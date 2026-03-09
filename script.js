@@ -162,7 +162,6 @@ function salvarCaractereNoFirebase(charId) {
 function atualizarPerfilUI() {
     document.getElementById('characterDisplay').textContent = CARACTERES[caracterSelecionado].emoji;
     document.getElementById('userName').textContent = CARACTERES[caracterSelecionado].nome;
-    document.getElementById('userEmail').textContent = usuarioLogado.email;
 }
 
 // ===== TABULEIRO =====
@@ -245,7 +244,6 @@ function atualizarProgresso() {
     document.getElementById('percentage').textContent = percentual + '%';
     document.getElementById('total').textContent = totalBancado.toFixed(2);
     document.getElementById('casasAbertas').textContent = casasAbertas;
-    document.getElementById('progressFill').style.width = percentual + '%';
     
     mostrarValorMetaFlutuante();
     
@@ -322,6 +320,7 @@ function atualizarTotalCasas() {
     }
     
     TOTAL_CASAS = novoTotal;
+    totalCasasJogo = novoTotal;
     errorMsg.textContent = 'Total atualizado!';
     
     setTimeout(function() {
