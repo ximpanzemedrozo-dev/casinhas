@@ -73,6 +73,8 @@ function gerarHexagons(container) {
             if (posX + tamanhoHex > largura) continue;
             
             const casa = casinhas[hex];
+            if (!casa) break;
+            
             const hexContainer = document.createElement('div');
             hexContainer.className = 'hexagon-container';
             hexContainer.style.left = posX + 'px';
@@ -91,37 +93,40 @@ function gerarHexagons(container) {
             
             hexContainer.appendChild(hexBox);
             
-            // ===== EVENTOS MOUSE =====
-            hexContainer.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (!casa.paga) {
-                    clicarCasaTrilha(hex);
-                }
-            });
+            // ===== CRIAR CLOSURE PARA CAPTURAR VALORES =====
+            (function(index, hexCont, hexB, c) {
+                // ===== EVENTOS MOUSE =====
+                hexCont.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (!c.paga) {
+                        clicarCasaTrilha(index);
+                    }
+                });
 
-            hexContainer.addEventListener('mouseenter', function() {
-                if (!casa.paga) {
-                    hexBox.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
-                }
-            });
+                hexCont.addEventListener('mouseenter', function() {
+                    if (!c.paga) {
+                        hexB.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
+                    }
+                });
 
-            hexContainer.addEventListener('mouseleave', function() {
-                hexBox.style.transform = '';
-            });
+                hexCont.addEventListener('mouseleave', function() {
+                    hexB.style.transform = '';
+                });
 
-            // ===== EVENTOS TOUCH =====
-            hexContainer.addEventListener('touchstart', function(e) {
-                e.stopPropagation();
-                hexBox.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
-            }, { passive: true });
+                // ===== EVENTOS TOUCH =====
+                hexCont.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                    hexB.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
+                }, { passive: true });
 
-            hexContainer.addEventListener('touchend', function(e) {
-                e.stopPropagation();
-                if (!casa.paga) {
-                    clicarCasaTrilha(hex);
-                }
-                hexBox.style.transform = '';
-            }, { passive: true });
+                hexCont.addEventListener('touchend', function(e) {
+                    e.stopPropagation();
+                    if (!c.paga) {
+                        clicarCasaTrilha(index);
+                    }
+                    hexB.style.transform = '';
+                }, { passive: true });
+            })(hex, hexContainer, hexBox, casa);
 
             container.appendChild(hexContainer);
             hex++;
@@ -131,10 +136,15 @@ function gerarHexagons(container) {
 
 function clicarCasaTrilha(index) {
     var casa = casinhas[index];
+    if (!casa) return;
+    
     casa.paga = !casa.paga;
 
     var hexContainer = document.querySelector('[data-index="' + index + '"]');
+    if (!hexContainer) return;
+    
     var hexBox = hexContainer.querySelector('.hexagon-box');
+    if (!hexBox) return;
     
     if (casa.paga) {
         hexBox.classList.add('completada');
@@ -143,9 +153,11 @@ function clicarCasaTrilha(index) {
         
         // Fazer desaparecer após animação
         setTimeout(function() {
-            hexContainer.style.opacity = '0';
-            hexContainer.style.transform = 'scale(0)';
-            hexContainer.style.pointerEvents = 'none';
+            if (hexContainer) {
+                hexContainer.style.opacity = '0';
+                hexContainer.style.transform = 'scale(0)';
+                hexContainer.style.pointerEvents = 'none';
+            }
         }, 300);
         
         mostrarMensagem3D(casa);
@@ -179,7 +191,10 @@ function atualizarPosicaoPersonagem() {
     if (!playerMoving) return;
 
     // Encontrar posição do último hexágono completado
-    var ultimoHex = document.querySelector('[data-index="' + (casasCompletas - 1) + '"]');
+    var ultimoHex = null;
+    if (casasCompletas > 0) {
+        ultimoHex = document.querySelector('[data-index="' + (casasCompletas - 1) + '"]');
+    }
     
     if (ultimoHex && casasCompletas > 0) {
         var posX = ultimoHex.offsetLeft + 30;
