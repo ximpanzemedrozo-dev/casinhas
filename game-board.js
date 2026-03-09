@@ -191,14 +191,10 @@ function clicarCasaTrilha(index) {
             }
         }, 300);
         
-        // MOSTRAR MENSAGEM DEPOIS QUE SUMIR
+        // MOSTRAR MENSAGEM DEPOIS QUE SUMIR - CHAMADA DIRETA
         setTimeout(function() {
-            console.log('Chamando mostrarMensagem3D para casa ' + index);
-            if (window.mostrarMensagem3D) {
-                window.mostrarMensagem3D(casa);
-            } else {
-                console.error('mostrarMensagem3D nao encontrada!');
-            }
+            console.log('🎯 Chamando mostrarMensagemDireta para casa ' + index);
+            mostrarMensagemDireta(casa);
         }, 500);
         
         setTimeout(function() {
@@ -232,6 +228,116 @@ function clicarCasaTrilha(index) {
     atualizarProgresso();
     atualizarPosicaoPersonagem();
     salvarCasasNoFirebase();
+}
+
+// ===== FUNÇÃO PARA MOSTRAR MENSAGEM DIRETAMENTE =====
+function mostrarMensagemDireta(casa) {
+    console.log('═══════════════════════════════════════');
+    console.log('🎯 MOSTRAR MENSAGEM DIRETA CHAMADA');
+    console.log('Casa: ' + casa.numero);
+    console.log('═══════════════════════════════════════');
+    
+    try {
+        // Mensagens de sucesso
+        const MENSAGENS_SUCESSO = [
+            { emoji: '💰', texto: 'Parabéns! Você economizou R$ 2,50!' },
+            { emoji: '🎯', texto: 'Ótimo! Você está no caminho certo!' },
+            { emoji: '⭐', texto: 'Excelente! Continue economizando!' },
+            { emoji: '🏆', texto: 'Incrível! Você é um mestre da economia!' },
+            { emoji: '🚀', texto: 'Fantástico! Sua meta está perto!' },
+            { emoji: '💎', texto: 'Magnífico! Você é especial!' },
+            { emoji: '✨', texto: 'Sensacional! Você brilha como uma estrela!' },
+            { emoji: '🎉', texto: 'Que legal! Parabéns pela sua dedicação!' },
+            { emoji: '❤️', texto: 'Que amor! Você se ama economizando!' },
+            { emoji: '🌟', texto: 'Brilhante! Você está crescendo!' },
+            { emoji: '🎊', texto: 'Celebre! Cada pequeno passo importa!' },
+            { emoji: '🏅', texto: 'Medalha! Você merece essa vitória!' },
+            { emoji: '🔥', texto: 'Demais! Você está pegando fogo!' },
+            { emoji: '💪', texto: 'Forte! Sua força é inspiradora!' },
+            { emoji: '🌈', texto: 'Colorido! Seu futuro é brilhante!' },
+            { emoji: '🎁', texto: 'Presente! Você se dá um presente!' },
+            { emoji: '👏', texto: 'Bravo! Merecia de pé!' },
+            { emoji: '🌻', texto: 'Flor! Você desabrocha cada dia!' },
+            { emoji: '🦋', texto: 'Borboleta! Você voa cada vez mais alto!' },
+            { emoji: '🌙', texto: 'Lua! Você brilha à noite também!' }
+        ];
+
+        const CURIOSIDADES = [
+            { emoji: '📊', texto: 'Sabia? Economizar R$ 2,50/dia = R$ 75/mês!' },
+            { emoji: '💡', texto: 'Dica: Pequenas economias viram grandes fortunas!' },
+            { emoji: '🎓', texto: 'Fato: 90% dos milionários começaram economizando!' },
+            { emoji: '📈', texto: 'Estatística: Economias crescem com juros compostos!' },
+            { emoji: '🌍', texto: 'Global: Bilionários também economizam no começo!' },
+            { emoji: '⏰', texto: 'Tempo: 1 ano = R$ 912,50 economizados!' },
+            { emoji: '🎯', texto: 'Meta: Em 2 meses você terá R$ 150!' },
+            { emoji: '💳', texto: 'Smart: Cartão de débito controla gastos!' },
+            { emoji: '📱', texto: 'App: Use apps para rastrear economias!' },
+            { emoji: '🏦', texto: 'Banco: Abra poupança para multiplicar!' },
+            { emoji: '🚗', texto: 'Sonho: Em 1 ano compra pneus pro carro!' },
+            { emoji: '🎮', texto: 'Diversão: Economizar é como um jogo!' },
+            { emoji: '🍕', texto: 'Pizza: 1 pizza custa 7 economias suas!' },
+            { emoji: '☕', texto: 'Café: Café de casa = 10x mais economia!' },
+            { emoji: '📚', texto: 'Conhecimento: Leia sobre finanças pessoais!' },
+            { emoji: '🏠', texto: 'Casa: Economias são tijolos da sua casa!' },
+            { emoji: '🎬', texto: 'Cinema: Assistir em casa = mais economia!' },
+            { emoji: '🚴', texto: 'Saúde: Bicicleta = economia + exercício!' },
+            { emoji: '🌱', texto: 'Crescimento: Você está plantando sementes!' },
+            { emoji: '🎪', texto: 'Liberdade: Economia = liberdade financeira!' }
+        ];
+        
+        // Gerar mensagem aleatória
+        const tipoDados = Math.floor(Math.random() * 100);
+        let mensagem;
+        if (tipoDados < 60) {
+            mensagem = MENSAGENS_SUCESSO[Math.floor(Math.random() * MENSAGENS_SUCESSO.length)];
+        } else {
+            mensagem = CURIOSIDADES[Math.floor(Math.random() * CURIOSIDADES.length)];
+        }
+        
+        console.log('✅ Mensagem gerada: ' + mensagem.texto);
+        
+        // Criar ou atualizar modal
+        var modal = document.getElementById('messageModal');
+        
+        if (!modal) {
+            console.log('📦 Criando novo modal...');
+            modal = document.createElement('div');
+            modal.id = 'messageModal';
+            modal.className = 'message-modal';
+            document.body.appendChild(modal);
+        }
+        
+        // Inserir conteúdo
+        modal.innerHTML = `
+            <div class="message-content">
+                <div class="message-emoji">${mensagem.emoji}</div>
+                <p class="message-text">${mensagem.texto}</p>
+            </div>
+        `;
+        
+        // Remover classe show
+        modal.classList.remove('show');
+        
+        // Forçar reflow
+        void modal.offsetWidth;
+        
+        // Adicionar classe show
+        modal.classList.add('show');
+        console.log('✅ MODAL VISÍVEL NA TELA!');
+        
+        // Esconder após 3 segundos
+        setTimeout(function() {
+            console.log('⏱️ Escondendo modal...');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }, 3000);
+        
+    } catch (error) {
+        console.error('❌ ERRO em mostrarMensagemDireta:');
+        console.error(error);
+        console.error(error.stack);
+    }
 }
 
 function atualizarPosicaoPersonagem() {
@@ -279,34 +385,5 @@ function mostrarValorMetaFlutuante() {
     var totalBancado = casasCompletas * VALOR_CASINHA;
     var percentual = Math.round((casasCompletas / totalCasasJogo) * 100);
 
-    // Atualizar valor flutuante
-    var valorDisplay = document.getElementById('valorDisplay');
-    if (valorDisplay) {
-        valorDisplay.innerHTML = `
-            <span class="valor-icon">💰</span>
-            <span class="valor-text">R$ <strong id="valorNumero">${totalBancado.toFixed(2)}</strong></span>
-            <span class="valor-porcentagem">${percentual}%</span>
-        `;
-    }
-
-    // Atualizar header
-    var headerPercentage = document.getElementById('headerPercentage');
-    if (headerPercentage) {
-        headerPercentage.textContent = percentual + '%';
-    }
-
-    var headerProgressFill = document.getElementById('headerProgressFill');
-    if (headerProgressFill) {
-        headerProgressFill.style.width = percentual + '%';
-    }
-
-    // Atualizar casinhas abertas
-    var casasAbertasBottom = document.getElementById('casasAbertasBottom');
-    if (casasAbertasBottom) {
-        casasAbertasBottom.textContent = casasCompletas;
-    }
-}
-
-window.inicializarTrilha = inicializarTrilha;
-window.atualizarPosicaoPersonagem = atualizarPosicaoPersonagem;
-window.mostrarValorMetaFlutuante = mostrarValorMetaFlutuante;
+    // Atualizar valor flu*`
+
