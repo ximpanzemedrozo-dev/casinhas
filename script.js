@@ -164,10 +164,7 @@ function atualizarPerfilUI() {
 }
 
 // ===== TABULEIRO =====
-function criarTabuleiro() {
-    var board = document.getElementById('board');
-    board.innerHTML = '';
-    casinhas = [];
+function criarTabuleiro()casinhas = [];
 
     for (var i = 1; i <= TOTAL_CASAS; i++) {
         var casa = {
@@ -179,22 +176,13 @@ function criarTabuleiro() {
         };
 
         casinhas.push(casa);
-
-        var elemento = document.createElement('div');
-        elemento.className = 'casa grupo-' + casa.grupo;
-        elemento.innerHTML = '<div class="casa-icone">' + casa.mensagem.emoji + '</div><div class="casa-numero">#' + i + '</div><div class="casa-valor">R$ ' + casa.valor.toFixed(2) + '</div>';
-        
-        elemento.setAttribute('data-index', i - 1);
-        elemento.addEventListener('click', function(ev) {
-            var index = parseInt(ev.currentTarget.getAttribute('data-index'));
-            clicarCasa(index);
-        });
-        
-        board.appendChild(elemento);
     }
 
+    var boardContainer = document.getElementById('board');
+    criarTabuleiro3D(TOTAL_CASAS, boardContainer);
+    
     atualizarProgresso();
-    console.log("✅ Tabuleiro criado!");
+    console.log("✅ Tabuleiro 3D criado!");
 }
 
 function clicarCasa(index) {
@@ -329,6 +317,29 @@ function salvarCasasNoFirebase() {
 
 function carregarCasasDoFirebase() {
     if (!usuarioLogado) return;
+
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').get()
+        .then(function(doc) {
+            if (doc.exists) {
+                var dados = doc.data();
+                var casasPagas = dados.casasPagas || [];
+                
+                casinhas.forEach(function(casa) {
+                    if (casasPagas.indexOf(casa.numero) > -1) {
+                        casa.paga = true;
+                    } else {
+                        casa.paga = false;
+                    }
+                });
+
+                atualizarTabuleiro3D();
+                atualizarProgresso();
+            }
+        })
+        .catch(function(error) {
+            console.error('Erro ao carregar:', error);
+        });
+}
 
     firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').get()
         .then(function(doc) {
