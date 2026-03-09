@@ -19,53 +19,45 @@ let ultimoCasasAbertas = 0;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
+    inicializarEventos();
+    
     firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
             usuarioLogado = user;
             carregarDadosUsuario();
-            mostrarTela('gameScreen');
         } else {
             mostrarTela('loginScreen');
         }
     });
+});
 
-    var loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) loginBtn.addEventListener('click', fazerLogin);
-
-    var registerBtn = document.getElementById('registerBtn');
-    if (registerBtn) registerBtn.addEventListener('click', fazerRegistro);
-
-    var logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) logoutBtn.addEventListener('click', fazerLogout);
-    
-    var characterCards = document.querySelectorAll('.character-card');
-    characterCards.forEach(function(card) {
-        card.addEventListener('click', selecionarCaractere);
-    });
-    
-    var adminBtn = document.getElementById('adminBtn');
-    if (adminBtn) {
-        adminBtn.addEventListener('click', function() {
+function inicializarEventos() {
+    try {
+        document.getElementById('loginBtn').addEventListener('click', fazerLogin);
+        document.getElementById('registerBtn').addEventListener('click', fazerRegistro);
+        document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
+        
+        document.querySelectorAll('.character-card').forEach(function(card) {
+            card.addEventListener('click', selecionarCaractere);
+        });
+        
+        document.getElementById('adminBtn').addEventListener('click', function() {
             document.getElementById('adminModal').classList.add('show');
         });
-    }
-    
-    var closeAdmin = document.getElementById('closeAdmin');
-    if (closeAdmin) {
-        closeAdmin.addEventListener('click', function() {
+        
+        document.getElementById('closeAdmin').addEventListener('click', function() {
             document.getElementById('adminModal').classList.remove('show');
         });
+        
+        document.getElementById('verifyAdminBtn').addEventListener('click', verificarAdminPassword);
+        document.getElementById('updateTotalBtn').addEventListener('click', atualizarTotalCasas);
+        document.getElementById('resetAllBtn').addEventListener('click', resetarTodosDados);
+        
+        console.log('Eventos inicializados com sucesso!');
+    } catch (error) {
+        console.error('Erro ao inicializar eventos:', error);
     }
-    
-    var verifyAdminBtn = document.getElementById('verifyAdminBtn');
-    if (verifyAdminBtn) verifyAdminBtn.addEventListener('click', verificarAdminPassword);
-
-    var updateTotalBtn = document.getElementById('updateTotalBtn');
-    if (updateTotalBtn) updateTotalBtn.addEventListener('click', atualizarTotalCasas);
-
-    var resetAllBtn = document.getElementById('resetAllBtn');
-    if (resetAllBtn) resetAllBtn.addEventListener('click', resetarTodosDados);
-});
+}
 
 // ===== AUTENTICAÇÃO =====
 function fazerLogin() {
@@ -143,5 +135,51 @@ function carregarDadosUsuario() {
         })
         .catch(function(error) {
             console.error('Erro ao carregar dados:', error);
-            mostrarTela('character
+            mostrarTela('characterScreen');
+        });
+}
+
+function selecionarCaractere(e) {
+    var characterId = e.currentTarget.getAttribute('data-char');
+    caracterSelecionado = parseInt(characterId);
+    
+    document.querySelectorAll('.character-card').forEach(function(card) {
+        card.classList.remove('selected');
+    });
+    e.currentTarget.classList.add('selected');
+    
+    salvarCaractereNoFirebase(caracterSelecionado);
+    
+    setTimeout(function() {
+        mostrarTela('gameScreen');
+        criarTabuleiro();
+        carregarCasasDoFirebase();
+    }, 500);
+}
+
+function salvarCaractereNoFirebase(charId) {
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).set({
+        caractere: charId,
+        email: usuarioLogado.email,
+        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true })
+        .catch(function(error) {
+            console.error('Erro ao salvar caractere:', error);
+        });
+}
+
+function atualizarPerfilUI() {
+    document.getElementById('characterDisplay').textContent = CARACTERES[caracterSelecionado].emoji;
+    document.getElementById('userName').textContent = CARACTERES[caracterSelecionado].nome;
+}
+
+// ===== TABULEIRO =====
+function criarTabuleiro() {
+    casinhas = [];
+
+    for (var i = 1; i <= TOTAL_CASAS; i++) {
+        var casa = {
+            numero: i,
+            valor: VALOR_CASINHA,
+            p
 
