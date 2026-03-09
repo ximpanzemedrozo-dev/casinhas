@@ -19,19 +19,24 @@ let ultimoCasasAbertas = 0;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOMContentLoaded disparado');
     inicializarEventos();
     
     firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
+            console.log('👤 Usuário logado: ' + user.email);
             usuarioLogado = user;
             carregarDadosUsuario();
         } else {
+            console.log('👤 Nenhum usuário logado');
             mostrarTela('loginScreen');
         }
     });
 });
 
 function inicializarEventos() {
+    console.log('🎯 Inicializando eventos...');
+    
     document.getElementById('loginBtn').addEventListener('click', fazerLogin);
     document.getElementById('registerBtn').addEventListener('click', fazerRegistro);
     document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
@@ -112,6 +117,7 @@ function fazerLogout() {
 
 // ===== DADOS DO USUÁRIO =====
 function carregarDadosUsuario() {
+    console.log('⏳ Carregando dados do usuário...');
     mostrarCarregamento();
     
     firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).get()
@@ -124,6 +130,7 @@ function carregarDadosUsuario() {
                 criarTabuleiro();
                 carregarCasasDoFirebase();
             } else {
+                console.log('📋 Documento não existe, mostrando seleção de caractere');
                 mostrarTela('characterScreen');
             }
         })
@@ -169,6 +176,7 @@ function atualizarPerfilUI() {
 
 // ===== TABULEIRO =====
 function criarTabuleiro() {
+    console.log('🎮 Criando tabuleiro com 400 casas...');
     casinhas = [];
 
     for (var i = 1; i <= TOTAL_CASAS; i++) {
@@ -183,10 +191,20 @@ function criarTabuleiro() {
         casinhas.push(casa);
     }
 
+    console.log('✅ Tabuleiro criado com ' + casinhas.length + ' casas');
+    console.log('🎯 Chamando inicializarTrilha...');
+    
+    // VERIFICAR SE FUNÇÃO EXISTE
+    if (typeof inicializarTrilha !== 'function') {
+        console.error('❌ inicializarTrilha NÃO É UMA FUNÇÃO!');
+        console.error('Tipo: ' + typeof inicializarTrilha);
+        return;
+    }
+    
     inicializarTrilha();
     atualizarProgresso();
     esconderCarregamento();
-    console.log("Trilha do jogo criada com 400 casas!");
+    console.log("✅ Trilha do jogo criada!");
 }
 
 // ===== VERIFICAR FOGOS =====
@@ -364,23 +382,19 @@ function fecharCelebracao() {
 }
 
 function mostrarCarregamento() {
-    console.log('Carregando...');
+    console.log('⏳ Carregando...');
 }
 
 function esconderCarregamento() {
-    console.log('Carregamento concluido');
-}
-
-function mostrarMensagem3D(casa) {
-    console.log('Casa clicada:', casa.numero);
+    console.log('✅ Carregamento concluido');
 }
 
 function mostrarMilestone(casasAbertas) {
-    console.log('Milestone: ' + casasAbertas + ' casas abertas!');
+    console.log('🎉 Milestone: ' + casasAbertas + ' casas abertas!');
 }
 
 function mostrarToastProgresso(casasAbertas, totalCasas, totalBancado) {
-    console.log('Progresso: ' + casasAbertas + '/' + totalCasas + ' - R$ ' + totalBancado.toFixed(2));
+    console.log('📊 Progresso: ' + casasAbertas + '/' + totalCasas + ' - R$ ' + totalBancado.toFixed(2));
 }
 
 function vibraTabuleiro() {
@@ -398,11 +412,21 @@ function mostrarVitoria(totalBancado) {
 }
 
 function tocarSomClick() {
-    console.log('Som de click');
+    console.log('🔊 Som de click');
 }
 
 function tocarSomVitoria() {
-    console.log('Som de vitoria');
+    console.log('🔊 Som de vitoria');
 }
 
 window.fecharCelebracao = fecharCelebracao;
+window.criarTabuleiro = criarTabuleiro;
+window.verificarFogosDeArtificio = verificarFogosDeArtificio;
+window.verificarMetaAtingida = verificarMetaAtingida;
+window.atualizarProgresso = atualizarProgresso;
+window.salvarCasasNoFirebase = salvarCasasNoFirebase;
+window.mostrarMilestone = mostrarMilestone;
+window.tocarSomClick = tocarSomClick;
+window.tocarSomVitoria = tocarSomVitoria;
+
+console.log('✅ script.js carregado com sucesso!');
