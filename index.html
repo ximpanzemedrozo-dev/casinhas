@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="isometrico.css">
     <link rel="stylesheet" href="game-effects.css">
+    <link rel="stylesheet" href="game-board.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
@@ -75,98 +76,4 @@
                         <p id="userEmail">email@example.com</p>
                     </div>
                 </div>
-                
-                <button id="logoutBtn" class="btn-logout">🚪 Sair</button>
-                <button id="adminBtn" class="btn-admin">⚙️ Admin</button>
-            </header>
-
-            <!-- PROGRESSO -->
-            <div class="progress-section">
-                <h2>📊 Seu Progresso</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <p class="stat-label">Progresso</p>
-                        <p class="stat-value" id="percentage">0%</p>
-                    </div>
-                    <div class="stat-card">
-                        <p class="stat-label">Total Bancado</p>
-                        <p class="stat-value">R$ <span id="total">0</span></p>
-                    </div>
-                    <div class="stat-card">
-                        <p class="stat-label">Casinhas Abertas</p>
-                        <p class="stat-value"><span id="casasAbertas">0</span>/400</p>
-                    </div>
-                </div>
-                
-                <div class="progress-bar-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                    <p class="meta-text">Meta: R$ 1.000,00</p>
-                </div>
-            </div>
-
-            <!-- TABULEIRO 3D -->
-            <main class="board-3d">
-                <div id="board"></div>
-            </main>
-        </div>
-    </div>
-
-    <!-- ADMIN PANEL -->
-    <div id="adminModal" class="modal">
-        <div class="modal-content admin-content">
-            <button class="modal-close" id="closeAdmin">&times;</button>
-            <h2>⚙️ Painel Administrativo</h2>
-            
-            <div class="admin-form">
-                <label>Senha de Administrador:</label>
-                <input type="password" id="adminPassword" placeholder="Digite a senha">
-                <button id="verifyAdminBtn" class="btn-primary">Verificar</button>
-            </div>
-            
-            <div id="adminPanel" class="admin-panel" style="display:none;">
-                <div class="admin-section">
-                    <h3>Gerenciar Casinhas</h3>
-                    <p>Total de casinhas: <strong id="totalCasasDisplay">400</strong></p>
-                    
-                    <div class="admin-controls">
-                        <label>Novo total:</label>
-                        <input type="number" id="newTotal" min="1" max="1000" value="400">
-                        <button id="updateTotalBtn" class="btn-success">Atualizar</button>
-                    </div>
-                </div>
-                
-                <div class="admin-section">
-                    <h3>Ações</h3>
-                    <button id="resetAllBtn" class="btn-danger">🔄 Resetar Todos os Dados</button>
-                </div>
-            </div>
-            
-            <p id="adminError" class="error-msg"></p>
-        </div>
-    </div>
-
-    <!-- CELEBRAÇÃO MODAL -->
-    <div id="celebrationModal" class="modal celebration-modal">
-        <div class="celebration-content">
-            <div class="celebration-icon">🎉</div>
-            <h2 id="celebrationText">META ATINGIDA!</h2>
-            <p id="celebrationMessage">Parabéns! Você economizou R$ 1.000,00!</p>
-            <button class="btn-primary" onclick="fecharCelebracao()">Continuar</button>
-        </div>
-    </div>
-
-    <!-- SCRIPTS - ORDEM IMPORTANTE! -->
-    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
-    
-    <script src="firebase-config.js"></script>
-    <script src="dados-casinhas.js"></script>
-    <script src="game-audio.js"></script>
-    <script src="game-animations.js"></script>
-    <script src="isometrico-3d.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+
