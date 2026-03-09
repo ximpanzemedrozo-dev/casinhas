@@ -252,7 +252,7 @@ function verificarMetaAtingida() {
     }
 }
 
-// ===== ATUALIZAR PROGRESSO =====
+// ===== ATUALIZAR PROGRESSO COM META DINÂMICA =====
 function atualizarProgresso() {
     var casasAbertas = 0;
     casinhas.forEach(function(c) {
@@ -273,6 +273,19 @@ function atualizarProgresso() {
 
     var progressFill = document.getElementById('progressFill');
     if (progressFill) progressFill.style.width = percentual + '%';
+    
+    // ===== ATUALIZAR META DINÂMICA =====
+    var metaTotal = TOTAL_CASAS * VALOR_CASINHA;
+    var metaValor = document.getElementById('metaValor');
+    if (metaValor) {
+        metaValor.textContent = 'R$ ' + metaTotal.toFixed(2).replace('.', ',');
+    }
+    
+    // ===== ATUALIZAR TOTAL DE CASINHAS NO RODAPÉ =====
+    var casasAbertasBottom = document.getElementById('casasAbertasBottom');
+    if (casasAbertasBottom) {
+        casasAbertasBottom.textContent = casasAbertas;
+    }
     
     mostrarValorMetaFlutuante();
 }
@@ -345,8 +358,7 @@ function atualizarTotalCasas() {
     }
     
     TOTAL_CASAS = novoTotal;
-    totalCasasJogo = novoTotal;
-    errorMsg.textContent = 'Total atualizado!';
+    errorMsg.textContent = 'Total atualizado para ' + novoTotal + ' casinhas!';
     
     setTimeout(function() {
         criarTabuleiro();
@@ -419,6 +431,38 @@ function tocarSomVitoria() {
     console.log('🔊 Som de vitoria');
 }
 
+function mostrarValorMetaFlutuante() {
+    var casasCompletas = 0;
+    casinhas.forEach(function(c) {
+        if (c.paga) casasCompletas++;
+    });
+
+    var totalBancado = casasCompletas * VALOR_CASINHA;
+    var percentual = Math.round((casasCompletas / TOTAL_CASAS) * 100);
+
+    // Atualizar valor flutuante
+    var valorDisplay = document.getElementById('valorDisplay');
+    if (valorDisplay) {
+        valorDisplay.innerHTML = `
+            <span class="valor-icon">💰</span>
+            <span class="valor-text">R$ <strong id="valorNumero">${totalBancado.toFixed(2)}</strong></span>
+            <span class="valor-porcentagem">${percentual}%</span>
+        `;
+    }
+
+    // Atualizar header
+    var headerPercentage = document.getElementById('headerPercentage');
+    if (headerPercentage) {
+        headerPercentage.textContent = percentual + '%';
+    }
+
+    var headerProgressFill = document.getElementById('headerProgressFill');
+    if (headerProgressFill) {
+        headerProgressFill.style.width = percentual + '%';
+    }
+}
+
+// ===== EXPORTAR FUNÇÕES GLOBAIS =====
 window.fecharCelebracao = fecharCelebracao;
 window.criarTabuleiro = criarTabuleiro;
 window.verificarFogosDeArtificio = verificarFogosDeArtificio;
@@ -428,5 +472,6 @@ window.salvarCasasNoFirebase = salvarCasasNoFirebase;
 window.mostrarMilestone = mostrarMilestone;
 window.tocarSomClick = tocarSomClick;
 window.tocarSomVitoria = tocarSomVitoria;
+window.mostrarValorMetaFlutuante = mostrarValorMetaFlutuante;
 
 console.log('✅ script.js carregado com sucesso!');
