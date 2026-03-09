@@ -1,7 +1,7 @@
-// ===== SISTEMA DE TRILHA 3D COM HEXÁGONOS + TOUCH =====
+// ===== SISTEMA DE TRILHA 3D COM 400 HEXÁGONOS + TOUCH =====
 
 let posicaoAtual = 0;
-let totalCasasJogo = 140;
+let totalCasasJogo = 400;
 
 function inicializarTrilha() {
     const gameBoard = document.getElementById('gameBoard');
@@ -54,22 +54,21 @@ function inicializarTrilha() {
 }
 
 function gerarHexagons(container) {
-    const largura = container.offsetWidth || 800;
-    const altura = container.offsetHeight || 500;
+    const largura = container.offsetWidth || 1200;
     
-    // Grid isométrico
-    const tamanhoHex = 100;
-    const espacoX = 110;
-    const espacoY = 130;
+    // Grid isométrico OTIMIZADO para 400 casas
+    const tamanhoHex = 60;
+    const espacoX = 65;
+    const espacoY = 75;
     
     let hex = 0;
     
-    for (let row = 0; row < 3; row++) {
+    for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 50; col++) {
             if (hex >= totalCasasJogo) break;
             
             const posX = col * espacoX + (row % 2 ? espacoX / 2 : 0);
-            const posY = row * espacoY + 80;
+            const posY = row * espacoY + 40;
             
             if (posX + tamanhoHex > largura) continue;
             
@@ -84,7 +83,7 @@ function gerarHexagons(container) {
             hexBox.className = 'hexagon-box' + (casa.paga ? ' completada' : '');
             hexBox.innerHTML = `
                 <div class="hexagon-front">
-                    <div class="hexagon-icone">${casa.mensagem.emoji}</div>
+                    <div class="hexagon-icone">🏠</div>
                     <div class="hexagon-numero">#${hex + 1}</div>
                 </div>
                 <div class="hexagon-shadow"></div>
@@ -114,7 +113,6 @@ function gerarHexagons(container) {
             hexContainer.addEventListener('touchstart', function(e) {
                 e.stopPropagation();
                 hexBox.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
-                hexBox.style.touchAction = 'manipulation';
             }, { passive: true });
 
             hexContainer.addEventListener('touchend', function(e) {
@@ -124,11 +122,6 @@ function gerarHexagons(container) {
                 }
                 hexBox.style.transform = '';
             }, { passive: true });
-
-            hexContainer.addEventListener('touchmove', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }, { passive: false });
 
             container.appendChild(hexContainer);
             hex++;
@@ -148,6 +141,13 @@ function clicarCasaTrilha(index) {
         hexBox.classList.add('nova-casa');
         hexContainer.classList.add('clicada');
         
+        // Fazer desaparecer após animação
+        setTimeout(function() {
+            hexContainer.style.opacity = '0';
+            hexContainer.style.transform = 'scale(0)';
+            hexContainer.style.pointerEvents = 'none';
+        }, 300);
+        
         mostrarMensagem3D(casa);
         verificarFogosDeArtificio();
         verificarMetaAtingida();
@@ -159,6 +159,9 @@ function clicarCasaTrilha(index) {
         }, 600);
     } else {
         hexBox.classList.remove('completada');
+        hexContainer.style.opacity = '1';
+        hexContainer.style.transform = '';
+        hexContainer.style.pointerEvents = 'auto';
     }
 
     atualizarProgresso();
@@ -179,14 +182,14 @@ function atualizarPosicaoPersonagem() {
     var ultimoHex = document.querySelector('[data-index="' + (casasCompletas - 1) + '"]');
     
     if (ultimoHex && casasCompletas > 0) {
-        var posX = ultimoHex.offsetLeft + 50;
-        var posY = ultimoHex.offsetTop + 50;
+        var posX = ultimoHex.offsetLeft + 30;
+        var posY = ultimoHex.offsetTop + 30;
         
         playerMoving.style.left = posX + 'px';
         playerMoving.style.top = posY + 'px';
     } else {
         playerMoving.style.left = '0px';
-        playerMoving.style.top = '80px';
+        playerMoving.style.top = '40px';
     }
 
     // Atualizar linha de progresso
@@ -235,22 +238,6 @@ function mostrarValorMetaFlutuante() {
         casasAbertasBottom.textContent = casasCompletas;
     }
 }
-
-// ===== SUPORTE A GESTOS TOUCH =====
-let touchStartX = 0;
-let touchStartY = 0;
-let touchEndX = 0;
-let touchEndY = 0;
-
-document.addEventListener('touchstart', function(e) {
-    touchStartX = e.changedTouches[0].screenX;
-    touchStartY = e.changedTouches[0].screenY;
-}, { passive: true });
-
-document.addEventListener('touchend', function(e) {
-    touchEndX = e.changedTouches[0].screenX;
-    touchEndY = e.changedTouches[0].screenY;
-}, { passive: true });
 
 window.inicializarTrilha = inicializarTrilha;
 window.atualizarPosicaoPersonagem = atualizarPosicaoPersonagem;
