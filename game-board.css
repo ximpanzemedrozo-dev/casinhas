@@ -1,15 +1,21 @@
-/* ===== TRILHA DO JOGO ESTILO INTERLAND ===== */
+/* ===== TRILHA 3D ISOMÉTRICA COM HEXÁGONOS ===== */
 
 .game-track {
     position: relative;
     width: 100%;
-    height: 150px;
-    background: linear-gradient(90deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.08) 100%);
-    border: 3px solid #4caf50;
+    min-height: 500px;
+    background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
     border-radius: 20px;
     overflow: hidden;
     box-shadow: inset 0 8px 15px rgba(0, 0, 0, 0.3), 0 4px 15px rgba(76, 175, 80, 0.2);
-    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
 }
 
 .track-background {
@@ -19,288 +25,295 @@
     width: 100%;
     height: 100%;
     background: 
-        repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 50px,
-            rgba(76, 175, 80, 0.1) 50px,
-            rgba(76, 175, 80, 0.1) 55px
-        );
+        linear-gradient(30deg, transparent 24%, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.05) 75%, rgba(255, 255, 255, 0.05) 76%, transparent 77%, transparent),
+        linear-gradient(60deg, transparent 24%, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.05) 75%, rgba(255, 255, 255, 0.05) 76%, transparent 77%, transparent);
+    background-size: 50px 87px;
+    background-position: 0 0, 25px 43.5px;
     pointer-events: none;
 }
 
-/* ===== PERSONAGEM NA TRILHA ===== */
+/* ===== CONTAINER DO CAMINHO ===== */
+.path-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+/* ===== PERSONAGEM 3D ROSA ===== */
 .player-container {
     position: absolute;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    width: 100px;
-    height: 100px;
-    z-index: 100;
-    transition: left 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 200;
+    transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
 }
 
 .player-character {
-    width: 100%;
-    height: 100%;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ff69b4 0%, #ff1493 50%, #ff69b4 100%);
+    border-radius: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 5em;
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.95) 0%, rgba(255, 179, 0, 0.95) 100%);
-    border: 4px solid #fff;
-    border-radius: 20px;
-    box-shadow: 0 12px 30px rgba(255, 215, 0, 0.7), inset 0 2px 5px rgba(255, 255, 255, 0.3);
+    font-size: 3.5em;
+    box-shadow: 0 20px 40px rgba(255, 20, 147, 0.6), inset 0 2px 5px rgba(255, 255, 255, 0.3);
     animation: playerFloat 2s ease-in-out infinite;
+    border: 3px solid #fff;
     position: relative;
+    user-select: none;
 }
 
 .player-character::before {
     content: '';
     position: absolute;
-    top: -15px;
+    top: -20px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
-    border-bottom: 15px solid #ffd700;
-    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+    border-bottom: 20px solid #ff1493;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
 }
 
 @keyframes playerFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
+    0%, 100% { transform: translateY(0) rotateZ(-5deg); }
+    50% { transform: translateY(-15px) rotateZ(5deg); }
 }
 
 .player-shadow {
     position: absolute;
-    width: 90%;
-    height: 12px;
+    width: 70px;
+    height: 15px;
     background: radial-gradient(ellipse, rgba(0, 0, 0, 0.5) 0%, transparent 70%);
-    bottom: -18px;
-    left: 5%;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
     border-radius: 50%;
 }
 
-/* ===== TRILHA APAGANDO (FADE) ===== */
-.track-fade {
+/* ===== HEXÁGONOS 3D ===== */
+.hexagon-container {
     position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, transparent 100%);
-    pointer-events: none;
-    z-index: 50;
-}
-
-/* ===== CASAS CLICÁVEIS ===== */
-.house-clickable {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 70px;
-    height: 70px;
+    width: 100px;
+    height: 100px;
+    perspective: 1200px;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 50;
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
 }
 
-.house-box {
+.hexagon-box {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
-    border: 3px solid #333;
-    border-radius: 12px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: all 0.3s ease;
+    will-change: transform;
+}
+
+.hexagon-box:active {
+    transform: rotateY(15deg) rotateX(10deg) scale(1.15) !important;
+}
+
+@media (hover: hover) {
+    .hexagon-box:hover {
+        transform: rotateY(15deg) rotateX(10deg) scale(1.15);
+    }
+}
+
+.hexagon-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    border: 3px solid #fff;
     font-weight: bold;
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+/* Frente do hexágono */
+.hexagon-front {
+    background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+    clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+    box-shadow: 
+        -10px 10px 20px rgba(0, 0, 0, 0.3),
+        inset 0 2px 5px rgba(255, 255, 255, 0.5);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Sombra 3D do hexágono */
+.hexagon-shadow {
+    position: absolute;
+    width: 100%;
+    height: 15px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%);
+    bottom: -15px;
+    left: 0;
+    clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+}
+
+.hexagon-icone {
+    font-size: 2em;
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    user-select: none;
+    pointer-events: none;
+}
+
+.hexagon-numero {
+    font-size: 0.8em;
     color: #333;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    font-size: 0.75em;
-    padding: 4px;
-    opacity: 1;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-}
-
-.house-box:hover {
-    transform: scale(1.25) translateY(-10px);
-    box-shadow: 0 12px 25px rgba(255, 215, 0, 0.5);
-    border-color: #ffd700;
-    background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
-}
-
-.house-icone {
-    font-size: 1.8em;
-    margin-bottom: 2px;
-}
-
-.house-numero {
-    font-size: 0.65em;
     font-weight: bold;
-    color: #666;
+    user-select: none;
+    pointer-events: none;
 }
 
-/* ===== CASA COMPLETADA ===== */
-.house-box.completada {
+/* ===== HEXÁGONO COMPLETADO ===== */
+.hexagon-box.completada {
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.hexagon-box.completada .hexagon-front {
     background: linear-gradient(135deg, #2d5a3d 0%, #1a472a 100%);
-    color: #4caf50;
-    border-color: #4caf50;
-    opacity: 0.3;
-    cursor: default;
-    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+    box-shadow: 
+        -5px 5px 10px rgba(0, 0, 0, 0.5),
+        inset 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
-.house-box.completada:hover {
-    transform: none;
-    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+.hexagon-box.completada .hexagon-icone {
+    filter: grayscale(100%);
 }
 
-.house-box.completada::after {
+.hexagon-box.completada::after {
     content: "✓";
     position: absolute;
-    top: 3px;
-    right: 4px;
-    font-size: 1.2em;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em;
     color: #4caf50;
-    background: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
-/* ===== PULSAÇÃO NA NOVA CASA ===== */
-.house-box.nova-casa {
-    animation: housePulse 0.6s ease;
+/* ===== ANIMAÇÃO DE NOVA CASA ===== */
+.hexagon-box.nova-casa {
+    animation: hexagonPulse 0.6s ease;
 }
 
-@keyframes housePulse {
+@keyframes hexagonPulse {
     0% {
-        transform: scale(1);
-        box-shadow: 0 6px 15px rgba(255, 215, 0, 0);
+        transform: scale(0.8) rotateY(0deg);
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
     }
     50% {
-        transform: scale(1.2);
-        box-shadow: 0 10px 25px rgba(255, 215, 0, 0.8);
+        transform: scale(1.2) rotateY(360deg);
+        box-shadow: 0 0 0 20px rgba(255, 215, 0, 0);
     }
     100% {
-        transform: scale(1);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        transform: scale(1) rotateY(0deg);
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
     }
 }
 
-/* ===== PROGRESSO TRACK ===== */
-.progress-track {
-    position: absolute;
-    bottom: -25px;
-    left: 0;
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid #4caf50;
+/* ===== ANIMAÇÃO DE CLICK ===== */
+.hexagon-box.clicada {
+    animation: hexagonClick 0.5s ease;
 }
 
-.progress-track-fill {
-    height: 100%;
+@keyframes hexagonClick {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3) rotateZ(10deg); }
+    100% { transform: scale(1); }
+}
+
+/* ===== PROGRESSO VISUAL ===== */
+.progress-line {
+    position: absolute;
+    height: 4px;
     background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+    bottom: 20px;
+    left: 0;
     width: 0%;
     transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-}
-
-/* ===== ANIMAÇÕES EXTRAS ===== */
-.house-clickable.clicada .house-box {
-    animation: houseClick 0.5s ease;
-}
-
-@keyframes houseClick {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.3) rotate(5deg);
-    }
-    100% {
-        transform: scale(1);
-    }
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+    pointer-events: none;
 }
 
 /* ===== RESPONSIVO ===== */
 @media (max-width: 768px) {
     .game-track {
-        height: 120px;
+        min-height: 400px;
+        padding: 30px 20px;
     }
 
-    .player-container {
-        width: 85px;
-        height: 85px;
+    .hexagon-container {
+        width: 80px;
+        height: 80px;
     }
 
     .player-character {
-        font-size: 4em;
+        width: 70px;
+        height: 70px;
+        font-size: 3em;
     }
 
-    .house-clickable {
-        width: 60px;
-        height: 60px;
-    }
-
-    .house-box {
-        font-size: 0.65em;
-        border-radius: 10px;
-    }
-
-    .house-icone {
+    .hexagon-icone {
         font-size: 1.5em;
     }
 
-    .house-box:hover {
-        transform: scale(1.15) translateY(-8px);
+    .hexagon-numero {
+        font-size: 0.7em;
+    }
+
+    .hexagon-box:active {
+        transform: rotateY(15deg) rotateX(10deg) scale(1.1) !important;
     }
 }
 
 @media (max-width: 480px) {
     .game-track {
-        height: 100px;
+        min-height: 350px;
+        padding: 20px;
     }
 
-    .player-container {
-        width: 75px;
-        height: 75px;
+    .hexagon-container {
+        width: 70px;
+        height: 70px;
     }
 
     .player-character {
-        font-size: 3.5em;
+        width: 60px;
+        height: 60px;
+        font-size: 2.5em;
     }
 
-    .house-clickable {
-        width: 50px;
-        height: 50px;
-    }
-
-    .house-box {
-        font-size: 0.6em;
-        border-radius: 8px;
-    }
-
-    .house-icone {
+    .hexagon-icone {
         font-size: 1.3em;
     }
 
-    .house-box:hover {
-        transform: scale(1.1) translateY(-6px);
+    .hexagon-numero {
+        font-size: 0.65em;
+    }
+
+    .hexagon-box:active {
+        transform: rotateY(10deg) rotateX(8deg) scale(1.05) !important;
     }
 }
