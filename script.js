@@ -181,5 +181,238 @@ function criarTabuleiro() {
         var casa = {
             numero: i,
             valor: VALOR_CASINHA,
-            p
-
+            paga: false,
+            grupo: Math.floor((i - 1) / 50) % 8,
+            mensagem: obterMensagem(i)
+        };
+
+        casinhas.push(casa);
+    }
+
+    inicializarTrilha();
+    atualizarProgresso();
+    esconderCarregamento();
+    console.log("Trilha do jogo criada!");
+}
+
+// ===== VERIFICAR FOGOS =====
+function verificarFogosDeArtificio() {
+    var casasAbertas = 0;
+    casinhas.forEach(function(c) {
+        if (c.paga) casasAbertas++;
+    });
+    
+    if (casasAbertas > 0 && casasAbertas % 10 === 0 && casasAbertas !== ultimoCasasAbertas) {
+        ultimoCasasAbertas = casasAbertas;
+        lancarFogos();
+        mostrarMilestone(casasAbertas);
+    }
+}
+
+function lancarFogos() {
+    vibraTabuleiro();
+    
+    for (var i = 0; i < 3; i++) {
+        setTimeout(function() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }, i * 200);
+    }
+}
+
+// ===== VERIFICAR META =====
+function verificarMetaAtingida() {
+    var casasAbertas = 0;
+    casinhas.forEach(function(c) {
+        if (c.paga) casasAbertas++;
+    });
+    
+    var totalBancado = casasAbertas * VALOR_CASINHA;
+    
+    if (casasAbertas >= TOTAL_CASAS) {
+        setTimeout(function() {
+            mostrarVitoria(totalBancado);
+            tocarSomVitoria();
+        }, 1000);
+    }
+}
+
+// ===== ATUALIZAR PROGRESSO =====
+function atualizarProgresso() {
+    var casasAbertas = 0;
+    casinhas.forEach(function(c) {
+        if (c.paga) casasAbertas++;
+    });
+    
+    var totalBancado = casasAbertas * VALOR_CASINHA;
+    var percentual = Math.round((casasAbertas / TOTAL_CASAS) * 100);
+
+    var percentage = document.getElementById('percentage');
+    if (percentage) percentage.textContent = percentual + '%';
+
+    var total = document.getElementById('total');
+    if (total) total.textContent = totalBancado.toFixed(2);
+
+    var casasAbertasEl = document.getElementById('casasAbertas');
+    if (casasAbertasEl) casasAbertasEl.textContent = casasAbertas;
+
+    var progressFill = document.getElementById('progressFill');
+    if (progressFill) progressFill.style.width = percentual + '%';
+    
+    mostrarValorMetaFlutuante();
+    
+    if (percentual > 0 && percentual % 10 === 0 && casasAbertas % 10 === 0) {
+        mostrarToastProgresso(casasAbertas, TOTAL_CASAS, totalBancado);
+    }
+}
+
+// ===== FIREBASE =====
+function salvarCasasNoFirebase() {
+    if (!usuarioLogado) return;
+
+    var casasPagas = [];
+    casinhas.forEach(function(c) {
+        if (c.paga) casasPagas.push(c.numero);
+    });
+
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').set({
+        casasPagas: casasPagas,
+        dataAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+    })
+        .catch(function(error) {
+            console.error('Erro ao salvar:', error);
+        });
+}
+
+function carregarCasasDoFirebase() {
+    if (!usuarioLogado) return;
+
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').get()
+        .then(function(doc) {
+            if (doc.exists) {
+                var dados = doc.data();
+                var casasPagas = dados.casasPagas || [];
+                
+                casinhas.forEach(function(casa) {
+                    if (casasPagas.indexOf(casa.numero) > -1) {
+                        casa.paga = true;
+                    } else {
+                        casa.paga = false;
+                    }
+                });
+
+                inicializarTrilha();
+                atualizarProgresso();
+            }
+        })
+        .catch(function(error) {
+            console.error('Erro ao carregar:', error);
+        });
+}
+
+// ===== ADMIN =====
+function verificarAdminPassword() {
+    var senha = document.getElementById('adminPassword').value;
+    var errorMsg = document.getElementById('adminError');
+    
+    if (senha === ADMIN_PASSWORD) {
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('totalCasasDisplay').textContent = TOTAL_CASAS;
+        errorMsg.textContent = '';
+    } else {
+        errorMsg.textContent = 'Senha de admin incorreta!';
+    }
+}
+
+function atualizarTotalCasas() {
+    var novoTotal = parseInt(document.getElementById('newTotal').value);
+    var errorMsg = document.getElementById('adminError');
+    
+    if (!novoTotal || novoTotal < 1) {
+        errorMsg.textContent = 'Digite um numero valido!';
+        return;
+    }
+    
+    TOTAL_CASAS = novoTotal;
+    totalCasasJogo = novoTotal;
+    errorMsg.textContent = 'Total atualizado!';
+    
+    setTimeout(function() {
+        criarTabuleiro();
+        document.getElementById('adminModal').classList.remove('show');
+    }, 1000);
+}
+
+function resetarTodosDados() {
+    if (confirm('Tem certeza? Isso apagara TODOS os dados!')) {
+        casinhas.forEach(function(casa) { 
+            casa.paga = false; 
+        });
+        
+        atualizarProgresso();
+        inicializarTrilha();
+        salvarCasasNoFirebase();
+        document.getElementById('adminModal').classList.remove('show');
+    }
+}
+
+// ===== UI =====
+function mostrarTela(telaId) {
+    var telas = document.querySelectorAll('.screen');
+    telas.forEach(function(screen) {
+        screen.classList.remove('active');
+    });
+    document.getElementById(telaId).classList.add('active');
+}
+
+// ===== FUNÇÕES GLOBAIS =====
+function fecharCelebracao() {
+    document.getElementById('celebrationModal').classList.remove('show');
+}
+
+function mostrarCarregamento() {
+    console.log('Carregando...');
+}
+
+function esconderCarregamento() {
+    console.log('Carregamento concluido');
+}
+
+function mostrarMensagem3D(casa) {
+    console.log('Casa clicada:', casa.numero);
+}
+
+function mostrarMilestone(casasAbertas) {
+    console.log('Milestone: ' + casasAbertas + ' casas abertas!');
+}
+
+function mostrarToastProgresso(casasAbertas, totalCasas, totalBancado) {
+    console.log('Progresso: ' + casasAbertas + '/' + totalCasas + ' - R$ ' + totalBancado.toFixed(2));
+}
+
+function vibraTabuleiro() {
+    if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+    }
+}
+
+function mostrarVitoria(totalBancado) {
+    var modal = document.getElementById('celebrationModal');
+    if (modal) {
+        document.getElementById('celebrationMessage').textContent = 'Parabens! Voce economizou R$ ' + totalBancado.toFixed(2) + '!';
+        modal.classList.add('show');
+    }
+}
+
+function tocarSomClick() {
+    console.log('Som de click');
+}
+
+function tocarSomVitoria() {
+    console.log('Som de vitoria');
+}
+
+window.fecharCelebracao = fecharCelebracao;
