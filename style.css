@@ -1,0 +1,317 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Kumbh Sans', Arial, sans-serif;
+    background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.header h1 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.progress-section {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 15px;
+    align-items: center;
+}
+
+.progress-info p {
+    font-size: 0.95em;
+    margin: 5px 0;
+}
+
+.progress-info span {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.progress-bar {
+    background: rgba(255, 255, 255, 0.1);
+    height: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 2px solid #ffd700;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
+.control-panel {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 2px solid #ffd700;
+}
+
+.control-panel h3 {
+    margin-bottom: 10px;
+    color: #ffd700;
+}
+
+.control-panel input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+.control-panel button {
+    padding: 10px 15px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.control-panel button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-save {
+    background: #4caf50;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #45a049;
+}
+
+.btn-reset {
+    background: #f44336;
+    color: white;
+}
+
+.btn-reset:hover {
+    background: #da190b;
+}
+
+.status-msg {
+    margin-top: 10px;
+    font-size: 0.9em;
+    min-height: 20px;
+}
+
+.status-msg.success {
+    color: #4caf50;
+}
+
+.status-msg.error {
+    color: #f44336;
+}
+
+.board-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 10px;
+}
+
+.casa {
+    background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+    border: 3px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    color: #333;
+    font-weight: bold;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.casa:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.casa.paga {
+    background: linear-gradient(135deg, #2d5a3d 0%, #1a472a 100%);
+    color: #fff;
+    border-color: #4caf50;
+}
+
+.casa.paga::after {
+    content: "✓";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.2em;
+    color: #4caf50;
+    background: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.casa.grupo-0 { border-top: 5px solid #8B4513; }
+.casa.grupo-1 { border-top: 5px solid #87CEEB; }
+.casa.grupo-2 { border-top: 5px solid #FF69B4; }
+.casa.grupo-3 { border-top: 5px solid #FF8C00; }
+.casa.grupo-4 { border-top: 5px solid #DC143C; }
+.casa.grupo-5 { border-top: 5px solid #FFD700; }
+.casa.grupo-6 { border-top: 5px solid #228B22; }
+.casa.grupo-7 { border-top: 5px solid #00008B; }
+
+.casa-icone {
+    font-size: 1.8em;
+    margin-bottom: 3px;
+}
+
+.casa-numero {
+    font-size: 0.9em;
+    margin: 2px 0;
+}
+
+.casa-valor {
+    font-size: 0.7em;
+    opacity: 0.8;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #2d5a3d 0%, #1a472a 100%);
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 450px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    border: 3px solid #ffd700;
+    position: relative;
+    text-align: center;
+    animation: bounce 0.5s ease;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2em;
+    cursor: pointer;
+}
+
+.modal-header {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+#modalMessage {
+    font-size: 1.1em;
+    color: #ffd700;
+    font-weight: bold;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.8em;
+    }
+
+    .progress-section {
+        grid-template-columns: 1fr;
+    }
+
+    .board {
+        grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+    }
+
+    .casa {
+        padding: 8px;
+        min-height: 90px;
+    }
+
+    .casa-icone {
+        font-size: 1.5em;
+    }
+
+    .casa-numero {
+        font-size: 0.8em;
+    }
+}
