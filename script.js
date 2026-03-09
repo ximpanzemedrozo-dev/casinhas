@@ -1,8 +1,8 @@
 // ===== CONFIGURAÇÃO =====
 const CARACTERES = {
     1: { nome: 'Carro Vermelho', emoji: '🚗' },
-    2: { nome: 'Chapéu de Seda', emoji: '💎' },
-    3: { nome: 'Relógio de Ouro', emoji: '⌚' },
+    2: { nome: 'Chapeu de Seda', emoji: '💎' },
+    3: { nome: 'Relogio de Ouro', emoji: '⌚' },
     4: { nome: 'Cachorro', emoji: '🐶' },
     5: { nome: 'Cartola', emoji: '🎩' },
     6: { nome: 'Coroa', emoji: '👑' }
@@ -57,7 +57,7 @@ function fazerLogin() {
     var errorMsg = document.getElementById('loginError');
 
     if (!email || !password) {
-        errorMsg.textContent = '❌ Preencha email e senha!';
+        errorMsg.textContent = 'Preencha email e senha!';
         return;
     }
 
@@ -66,7 +66,7 @@ function fazerLogin() {
             errorMsg.textContent = '';
         })
         .catch(function(error) {
-            errorMsg.textContent = '❌ ' + error.message;
+            errorMsg.textContent = 'Erro: ' + error.message;
         });
 }
 
@@ -76,24 +76,24 @@ function fazerRegistro() {
     var errorMsg = document.getElementById('loginError');
 
     if (!email || !password) {
-        errorMsg.textContent = '❌ Preencha email e senha!';
+        errorMsg.textContent = 'Preencha email e senha!';
         return;
     }
 
     if (password.length < 6) {
-        errorMsg.textContent = '❌ Senha deve ter pelo menos 6 caracteres!';
+        errorMsg.textContent = 'Senha deve ter pelo menos 6 caracteres!';
         return;
     }
 
     firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(function() {
-            errorMsg.textContent = '✅ Conta criada! Faça login agora.';
+            errorMsg.textContent = 'Conta criada! Faca login agora.';
             setTimeout(function() {
                 document.getElementById('loginBtn').click();
             }, 2000);
         })
         .catch(function(error) {
-            errorMsg.textContent = '❌ ' + error.message;
+            errorMsg.textContent = 'Erro: ' + error.message;
         });
 }
 
@@ -186,7 +186,7 @@ function criarTabuleiro() {
     
     atualizarProgresso();
     esconderCarregamento();
-    console.log("✅ Tabuleiro 3D criado!");
+    console.log("Tabuleiro 3D criado!");
 }
 
 // ===== VERIFICAR FOGOS =====
@@ -254,5 +254,111 @@ function atualizarProgresso() {
     }
 }
 
-// ===== FIREBASE =*
-
+// ===== FIREBASE =====
+function salvarCasasNoFirebase() {
+    if (!usuarioLogado) return;
+
+    var casasPagas = [];
+    casinhas.forEach(function(c) {
+        if (c.paga) casasPagas.push(c.numero);
+    });
+
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').set({
+        casasPagas: casasPagas,
+        dataAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+    })
+        .catch(function(error) {
+            console.error('Erro ao salvar:', error);
+        });
+}
+
+function carregarCasasDoFirebase() {
+    if (!usuarioLogado) return;
+
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').get()
+        .then(function(doc) {
+            if (doc.exists) {
+                var dados = doc.data();
+                var casasPagas = dados.casasPagas || [];
+                
+                casinhas.forEach(function(casa) {
+                    if (casasPagas.indexOf(casa.numero) > -1) {
+                        casa.paga = true;
+                    } else {
+                        casa.paga = false;
+                    }
+                });
+
+                atualizarTabuleiro3D();
+                atualizarProgresso();
+            }
+        })
+        .catch(function(error) {
+            console.error('Erro ao carregar:', error);
+        });
+}
+
+// ===== ADMIN =====
+function verificarAdminPassword() {
+    var senha = document.getElementById('adminPassword').value;
+    var errorMsg = document.getElementById('adminError');
+    
+    if (senha === ADMIN_PASSWORD) {
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('totalCasasDisplay').textContent = TOTAL_CASAS;
+        errorMsg.textContent = '';
+    } else {
+        errorMsg.textContent = 'Senha de admin incorreta!';
+    }
+}
+
+function atualizarTotalCasas() {
+    var novoTotal = parseInt(document.getElementById('newTotal').value);
+    var errorMsg = document.getElementById('adminError');
+    
+    if (!novoTotal || novoTotal < 1) {
+        errorMsg.textContent = 'Digite um numero valido!';
+        return;
+    }
+    
+    TOTAL_CASAS = novoTotal;
+    errorMsg.textContent = 'Total atualizado!';
+    
+    setTimeout(function() {
+        criarTabuleiro();
+        document.getElementById('adminModal').classList.remove('show');
+    }, 1000);
+}
+
+function resetarTodosDados() {
+    if (confirm('Tem certeza? Isso apagara TODOS os dados!')) {
+        casinhas.forEach(function(casa) { 
+            casa.paga = false; 
+        });
+        
+        var elementos = document.querySelectorAll('.casa-3d');
+        elementos.forEach(function(el) { 
+            el.classList.remove('flip'); 
+        });
+        
+        atualizarProgresso();
+        salvarCasasNoFirebase();
+        document.getElementById('adminModal').classList.remove('show');
+    }
+}
+
+// ===== UI =====
+function mostrarTela(telaId) {
+    var telas = document.querySelectorAll('.screen');
+    telas.forEach(function(screen) {
+        screen.classList.remove('active');
+    });
+    document.getElementById(telaId).classList.add('active');
+}
+
+// ===== FUNÇÕES GLOBAIS =====
+function fecharCelebracao() {
+    document.getElementById('celebrationModal').classList.remove('show');
+}
+
+window.fecharCelebracao = fecharCelebracao;
