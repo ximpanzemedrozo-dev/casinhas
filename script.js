@@ -339,5 +339,22 @@ function resetarTodosDados() {
         atualizarProgresso();
         inicializarTrilha();
         salvarCasasNoFirebase();
-        document.getElementById('adminModal').classList.remove*
-
+        document.getElementById('adminModal').classList.remove('show');
+    }
+}
+
+// ===== UI =====
+function mostrarTela(telaId) {
+    var telas = document.querySelectorAll('.screen');
+    telas.forEach(function(screen) {
+        screen.classList.remove('active');
+    });
+    document.getElementById(telaId).classList.add('active');
+}
+
+// ===== FUNÇÕES GLOBAIS =====
+function fecharCelebracao() {
+    document.getElementById('celebrationModal').classList.remove('show');
+}
+
+window.fecharCelebracao = fecharCelebracao;
