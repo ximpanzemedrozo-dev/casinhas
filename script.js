@@ -12,7 +12,6 @@ const ADMIN_PASSWORD = "admin123";
 
 let TOTAL_CASAS = 400;
 const VALOR_CASINHA = 2.50;
-const META_TOTAL = () => TOTAL_CASAS * VALOR_CASINHA;
 
 let casinhas = [];
 let usuarioLogado = null;
@@ -20,8 +19,8 @@ let caracterSelecionado = 1;
 let ultimoCasasAbertas = 0;
 
 // ===== INICIALIZAÇÃO =====
-document.addEventListener('DOMContentLoaded', () => {
-    auth.onAuthStateChanged((user) => {
+document.addEventListener('DOMContentLoaded', function() {
+    auth.onAuthStateChanged(function(user) {
         if (user) {
             usuarioLogado = user;
             carregarDadosUsuario();
@@ -35,44 +34,48 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('registerBtn').addEventListener('click', fazerRegistro);
     document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
     
-    document.querySelectorAll('.character-card').forEach(card => {
+    var cards = document.querySelectorAll('.character-card');
+    cards.forEach(function(card) {
         card.addEventListener('click', selecionarCaractere);
     });
     
-    document.getElementById('adminBtn').addEventListener('click', () => {
+    document.getElementById('adminBtn').addEventListener('click', function() {
         document.getElementById('adminModal').classList.add('show');
     });
-    document.getElementById('closeAdmin').addEventListener('click', () => {
+    
+    document.getElementById('closeAdmin').addEventListener('click', function() {
         document.getElementById('adminModal').classList.remove('show');
     });
+    
     document.getElementById('verifyAdminBtn').addEventListener('click', verificarAdminPassword);
     document.getElementById('updateTotalBtn').addEventListener('click', atualizarTotalCasas);
     document.getElementById('resetAllBtn').addEventListener('click', resetarTodosDados);
 });
 
 // ===== AUTENTICAÇÃO =====
-async function fazerLogin() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const errorMsg = document.getElementById('loginError');
+function fazerLogin() {
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+    var errorMsg = document.getElementById('loginError');
 
     if (!email || !password) {
         errorMsg.textContent = '❌ Preencha email e senha!';
         return;
     }
 
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-        errorMsg.textContent = '';
-    } catch (error) {
-        errorMsg.textContent = '❌ ' + error.message;
-    }
+    auth.signInWithEmailAndPassword(email, password)
+        .then(function() {
+            errorMsg.textContent = '';
+        })
+        .catch(function(error) {
+            errorMsg.textContent = '❌ ' + error.message;
+        });
 }
 
-async function fazerRegistro() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const errorMsg = document.getElementById('loginError');
+function fazerRegistro() {
+    var email = document.getElementById('email').value;
+    var password = document.getElementById('password').value;
+    var errorMsg = document.getElementById('loginError');
 
     if (!email || !password) {
         errorMsg.textContent = '❌ Preencha email e senha!';
@@ -84,17 +87,20 @@ async function fazerRegistro() {
         return;
     }
 
-    try {
-        await auth.createUserWithEmailAndPassword(email, password);
-        errorMsg.textContent = '✅ Conta criada! Faça login agora.';
-        setTimeout(() => { document.getElementById('loginBtn').click(); }, 2000);
-    } catch (error) {
-        errorMsg.textContent = '❌ ' + error.message;
-    }
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(function() {
+            errorMsg.textContent = '✅ Conta criada! Faça login agora.';
+            setTimeout(function() {
+                document.getElementById('loginBtn').click();
+            }, 2000);
+        })
+        .catch(function(error) {
+            errorMsg.textContent = '❌ ' + error.message;
+        });
 }
 
 function fazerLogout() {
-    auth.signOut().then(() => {
+    auth.signOut().then(function() {
         usuarioLogado = null;
         casinhas = [];
         mostrarTela('loginScreen');
@@ -104,54 +110,54 @@ function fazerLogout() {
 }
 
 // ===== DADOS DO USUÁRIO =====
-async function carregarDadosUsuario() {
-    try {
-        const doc = await db.collection('usuarios').doc(usuarioLogado.uid).get();
-        
-        if (doc.exists) {
-            const dados = doc.data();
-            caracterSelecionado = dados.caractere || 1;
-            atualizarPerfilUI();
-            mostrarTela('gameScreen');
-            criarTabuleiro();
-            carregarCasasDoFirebase();
-        } else {
+function carregarDadosUsuario() {
+    db.collection('usuarios').doc(usuarioLogado.uid).get()
+        .then(function(doc) {
+            if (doc.exists) {
+                var dados = doc.data();
+                caracterSelecionado = dados.caractere || 1;
+                atualizarPerfilUI();
+                mostrarTela('gameScreen');
+                criarTabuleiro();
+                carregarCasasDoFirebase();
+            } else {
+                mostrarTela('characterScreen');
+            }
+        })
+        .catch(function(error) {
+            console.error('Erro ao carregar dados:', error);
             mostrarTela('characterScreen');
-        }
-    } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        mostrarTela('characterScreen');
-    }
+        });
 }
 
 function selecionarCaractere(e) {
-    const characterId = e.currentTarget.dataset.char;
+    var characterId = e.currentTarget.dataset.char;
     caracterSelecionado = parseInt(characterId);
     
-    document.querySelectorAll('.character-card').forEach(card => {
+    var cards = document.querySelectorAll('.character-card');
+    cards.forEach(function(card) {
         card.classList.remove('selected');
     });
     e.currentTarget.classList.add('selected');
     
     salvarCaractereNoFirebase(caracterSelecionado);
     
-    setTimeout(() => {
+    setTimeout(function() {
         mostrarTela('gameScreen');
         criarTabuleiro();
         carregarCasasDoFirebase();
     }, 500);
 }
 
-async function salvarCaractereNoFirebase(charId) {
-    try {
-        await db.collection('usuarios').doc(usuarioLogado.uid).set({
-            caractere: charId,
-            email: usuarioLogado.email,
-            dataCriacao: new Date()
-        }, { merge: true });
-    } catch (error) {
-        console.error('Erro ao salvar caractere:', error);
-    }
+function salvarCaractereNoFirebase(charId) {
+    db.collection('usuarios').doc(usuarioLogado.uid).set({
+        caractere: charId,
+        email: usuarioLogado.email,
+        dataCriacao: new Date()
+    }, { merge: true })
+        .catch(function(error) {
+            console.error('Erro ao salvar caractere:', error);
+        });
 }
 
 function atualizarPerfilUI() {
@@ -162,12 +168,12 @@ function atualizarPerfilUI() {
 
 // ===== TABULEIRO =====
 function criarTabuleiro() {
-    const board = document.getElementById('board');
+    var board = document.getElementById('board');
     board.innerHTML = '';
     casinhas = [];
 
-    for (let i = 1; i <= TOTAL_CASAS; i++) {
-        const casa = {
+    for (var i = 1; i <= TOTAL_CASAS; i++) {
+        var casa = {
             numero: i,
             valor: VALOR_CASINHA,
             paga: false,
@@ -177,23 +183,24 @@ function criarTabuleiro() {
 
         casinhas.push(casa);
 
-        const elemento = document.createElement('div');
-        elemento.className = `casa grupo-${casa.grupo}`;
-        elemento.innerHTML = `
-            <div class="casa-icone">${casa.mensagem.emoji}</div>
-            <div class="casa-numero">#${i}</div>
-            <div class="casa-valor">R$ ${casa.valor.toFixed(2)}</div>
-        `;
-        elemento.addEventListener('click', () => clicarCasa(i - 1, elemento));
+        var elemento = document.createElement('div');
+        elemento.className = 'casa grupo-' + casa.grupo;
+        elemento.innerHTML = '<div class="casa-icone">' + casa.mensagem.emoji + '</div><div class="casa-numero">#' + i + '</div><div class="casa-valor">R$ ' + casa.valor.toFixed(2) + '</div>';
+        elemento.addEventListener('click', (function(index) {
+            return function() {
+                clicarCasa(index);
+            };
+        })(i - 1));
         board.appendChild(elemento);
     }
 
     atualizarProgresso();
-    console.log("✅ Tabuleiro criado com", TOTAL_CASAS, "casinhas!");
+    console.log("✅ Tabuleiro criado!");
 }
 
-function clicarCasa(index, elemento) {
-    const casa = casinhas[index];
+function clicarCasa(index) {
+    var elemento = document.querySelectorAll('.casa')[index];
+    var casa = casinhas[index];
     casa.paga = !casa.paga;
     
     if (casa.paga) {
@@ -209,7 +216,7 @@ function clicarCasa(index, elemento) {
 }
 
 function verificarFogosDeArtificio() {
-    const casasAbertas = casinhas.filter(c => c.paga).length;
+    var casasAbertas = casinhas.filter(function(c) { return c.paga; }).length;
     
     if (casasAbertas > 0 && casasAbertas % 10 === 0 && casasAbertas !== ultimoCasasAbertas) {
         ultimoCasasAbertas = casasAbertas;
@@ -229,9 +236,9 @@ function lancarFogos() {
 
 function tocarSomSucesso() {
     try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+        var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        var oscillator = audioContext.createOscillator();
+        var gainNode = audioContext.createGain();
         
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
@@ -250,14 +257,14 @@ function tocarSomSucesso() {
 }
 
 function verificarMetaAtingida() {
-    const casasAbertas = casinhas.filter(c => c.paga).length;
-    const totalBancado = casasAbertas * VALOR_CASINHA;
+    var casasAbertas = casinhas.filter(function(c) { return c.paga; }).length;
+    var totalBancado = casasAbertas * VALOR_CASINHA;
     
     if (casasAbertas >= TOTAL_CASAS) {
-        mostrarCelebracao('🎊 META ATINGIDA! 🎊', `Parabéns! Você economizou R$ ${totalBancado.toFixed(2)}!`);
+        mostrarCelebracao('🎊 META ATINGIDA! 🎊', 'Parabéns! Você economizou R$ ' + totalBancado.toFixed(2) + '!');
         
-        for (let i = 0; i < 3; i++) {
-            setTimeout(() => {
+        for (var i = 0; i < 3; i++) {
+            setTimeout(function() {
                 confetti({
                     particleCount: 200,
                     spread: 80,
@@ -269,7 +276,7 @@ function verificarMetaAtingida() {
 }
 
 function mostrarCelebracao(titulo, mensagem) {
-    const modal = document.getElementById('celebrationModal');
+    var modal = document.getElementById('celebrationModal');
     document.getElementById('celebrationText').textContent = titulo;
     document.getElementById('celebrationMessage').textContent = mensagem;
     modal.classList.add('show');
@@ -280,9 +287,9 @@ function fecharCelebracao() {
 }
 
 function atualizarProgresso() {
-    const casasAbertas = casinhas.filter(c => c.paga).length;
-    const totalBancado = casasAbertas * VALOR_CASINHA;
-    const percentual = Math.round((casasAbertas / TOTAL_CASAS) * 100);
+    var casasAbertas = casinhas.filter(function(c) { return c.paga; }).length;
+    var totalBancado = casasAbertas * VALOR_CASINHA;
+    var percentual = Math.round((casasAbertas / TOTAL_CASAS) * 100);
 
     document.getElementById('percentage').textContent = percentual + '%';
     document.getElementById('total').textContent = totalBancado.toFixed(2);
@@ -291,83 +298,12 @@ function atualizarProgresso() {
 }
 
 // ===== FIREBASE =====
-async function salvarCasasNoFirebase() {
+function salvarCasasNoFirebase() {
     if (!usuarioLogado) return;
 
-    try {
-        const casasPagas = casinhas
-            .filter(c => c.paga)
-            .map(c => c.numero);
+    var casasPagas = casinhas
+        .filter(function(c) { return c.paga; })
+        .map(function(c) { return c.numero; });
 
-        await db.collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').set({
-            casasPagas: casasPagas,
-            dataAtualizacao: new Date()
-        });
-    } catch (error) {
-        console.error('Erro ao salvar:', error);
-    }
-}
-
-async function carregarCasasDoFirebase() {
-    if (!usuarioLogado) return;
-
-    try {
-        const doc = await db.collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').get();
-        
-        if (doc.exists) {
-            const dados = doc.data();
-            const casasPagas = dados.casasPagas || [];
-            
-            casinhas.forEach(casa => {
-                casa.paga = casasPagas.includes(casa.numero);
-            });
-
-            document.querySelectorAll('.casa').forEach((el, index) => {
-                if (casinhas[index].paga) {
-                    el.classList.add('paga');
-                } else {
-                    el.classList.remove('paga');
-                }
-            });
-
-            atualizarProgresso();
-        }
-    } catch (error) {
-        console.error('Erro ao carregar:', error);
-    }
-}
-
-// ===== ADMIN =====
-function verificarAdminPassword() {
-    const senha = document.getElementById('adminPassword').value;
-    const errorMsg = document.getElementById('adminError');
-    
-    if (senha === ADMIN_PASSWORD) {
-        document.getElementById('adminPanel').style.display = 'block';
-        document.getElementById('totalCasasDisplay').textContent = TOTAL_CASAS;
-        errorMsg.textContent = '';
-    } else {
-        errorMsg.textContent = '❌ Senha de admin incorreta!';
-    }
-}
-
-function atualizarTotalCasas() {
-    const novoTotal = parseInt(document.getElementById('newTotal').value);
-    const errorMsg = document.getElementById('adminError');
-    
-    if (!novoTotal || novoTotal < 1) {
-        errorMsg.textContent = '❌ Digite um número válido!';
-        return;
-    }
-    
-    TOTAL_CASAS = novoTotal;
-    errorMsg.textContent = '✅ Total atualizado! Recarregando...';
-    
-    setTimeout(() => {
-        criarTabuleiro();
-        document.getElementById('adminModal').classList.remove('show');
-    }, 1000);
-}
-
-function reset*
+    db.collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('cas*
 
