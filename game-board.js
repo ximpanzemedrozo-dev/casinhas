@@ -5,13 +5,13 @@ let totalCasasJogo = 400;
 let ultimaCasaMostrada = -1;
 
 function inicializarTrilha() {
-    const gameBoard = document.getElementById('gameBoard');
-    if (!gameBoard) {
-        console.error('Elemento gameBoard nao encontrado');
+    const gameScreen = document.querySelector('.trilha-container'); // CORRIGIDO
+    if (!gameScreen) {
+        console.error('Elemento trilha-container nao encontrado');
         return;
     }
 
-    gameBoard.innerHTML = '';
+    gameScreen.innerHTML = '';
 
     // Container da trilha
     const track = document.createElement('div');
@@ -46,7 +46,7 @@ function inicializarTrilha() {
     pathContainer.appendChild(progressLine);
 
     track.appendChild(pathContainer);
-    gameBoard.appendChild(track);
+    gameScreen.appendChild(track);
 
     // Gerar primeira leva de 50 casinhas
     gerarProximasHexagons();
