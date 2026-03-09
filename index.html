@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo da Vida - Tabuleiro das Casinhas 🏠</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="isometrico.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
@@ -104,10 +104,9 @@
                 </div>
             </div>
 
-            <!-- TABULEIRO -->
-            <main class="board-container">
-                <h2>🏠 Tabuleiro das Casinhas</h2>
-                <div class="board" id="board"></div>
+            <!-- TABULEIRO 3D -->
+            <main class="board-3d">
+                <div id="board"></div>
             </main>
         </div>
     </div>
@@ -162,6 +161,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="dados-casinhas.js"></script>
+    <script src="isometrico-3d.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
