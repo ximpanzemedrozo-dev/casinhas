@@ -1,30 +1,26 @@
 // ===== CONFIGURAÇÃO DO FIREBASE =====
 
-// Inicializar Firebase com suas credenciais
 const firebaseConfig = {
-    apiKey: "AIzaSyB_sua_chave_aqui",
-    authDomain: "seu-projeto.firebaseapp.com",
-    projectId: "seu-projeto-id",
-    storageBucket: "seu-projeto.appspot.com",
-    messagingSenderId: "seu-numero",
-    appId: "seu-app-id"
+    apiKey: "AIzaSyCb2K_i-y1ln_CBqoKlMDinY7EzbLqPIFA",
+    authDomain: "gerenciador-inteligente-27636.firebaseapp.com",
+    projectId: "gerenciador-inteligente-27636",
+    storageBucket: "gerenciador-inteligente-27636.firebasestorage.app",
+    messagingSenderId: "377729052526",
+    appId: "1:377729052526:web:13ca749977b307d9525b7f",
+    measurementId: "G-03Q3XTZ13X"
 };
 
 // Inicializar Firebase
-firebase.initializeApp(firebaseConfig);
+try {
+    firebase.initializeApp(firebaseConfig);
+    console.log('✅ Firebase inicializado com sucesso!');
+    console.log('🔥 Projeto: ' + firebaseConfig.projectId);
+} catch (error) {
+    console.error('❌ Erro ao inicializar Firebase:', error);
+}
 
 // Obter referências
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-console.log('✅ Firebase inicializado com sucesso!');
-console.log('🔥 Projeto: ' + firebaseConfig.projectId);
-
-// Verificar status de conexão
-firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-        console.log('✅ Usuário conectado: ' + user.email);
-    } else {
-        console.log('❌ Nenhum usuário conectado');
-    }
-});
+console.log('✅ Firebase Config carregado!');
