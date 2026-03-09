@@ -13,8 +13,17 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Firebase references
-const auth = firebase.auth();
-const db = firebase.firestore();
+// Get references
+window.auth = firebase.auth();
+window.db = firebase.firestore();
 
-console.log("✅ Firebase inicializado!");
+console.log("Firebase inicializado com sucesso!");
+
+// Test connection
+firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+        console.log("Usuario logado:", user.email);
+    } else {
+        console.log("Nenhum usuario logado");
+    }
+});
