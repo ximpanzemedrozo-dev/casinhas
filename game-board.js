@@ -25,13 +25,13 @@ function inicializarTrilha() {
     const pathContainer = document.createElement('div');
     pathContainer.className = 'path-container';
 
-    // Personagem 3D Rosa
+    // Personagem 3D BRANCO com CABELO PRETO
     const playerContainer = document.createElement('div');
     playerContainer.id = 'playerMoving';
     playerContainer.className = 'player-container';
     playerContainer.innerHTML = `
         <div class="player-character">
-            👨‍💼
+            👨
         </div>
         <div class="player-shadow"></div>
     `;
@@ -55,82 +55,98 @@ function inicializarTrilha() {
 
 function gerarHexagons(container) {
     const largura = container.offsetWidth || 1200;
+    const altura = container.offsetHeight || 600;
     
-    // Grid isométrico OTIMIZADO para 400 casas
+    // Grid OTIMIZADO: 50 casas por "página"
+    // 10 colunas x 5 linhas = 50 casas por tela
+    // Total 8 telas para 400 casas
+    
     const tamanhoHex = 60;
-    const espacoX = 65;
-    const espacoY = 75;
+    const espacoX = 70;
+    const espacoY = 90;
+    
+    const colunasPerTela = 10;
+    const linhasPerTela = 5;
+    const casasPerTela = colunasPerTela * linhasPerTela; // 50
     
     let hex = 0;
+    let telasUsadas = 0;
     
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 50; col++) {
-            if (hex >= totalCasasJogo) break;
-            
-            const posX = col * espacoX + (row % 2 ? espacoX / 2 : 0);
-            const posY = row * espacoY + 40;
-            
-            if (posX + tamanhoHex > largura) continue;
-            
-            const casa = casinhas[hex];
-            if (!casa) break;
-            
-            const hexContainer = document.createElement('div');
-            hexContainer.className = 'hexagon-container';
-            hexContainer.style.left = posX + 'px';
-            hexContainer.style.top = posY + 'px';
-            hexContainer.setAttribute('data-index', hex);
-            
-            const hexBox = document.createElement('div');
-            hexBox.className = 'hexagon-box' + (casa.paga ? ' completada' : '');
-            hexBox.innerHTML = `
-                <div class="hexagon-front">
-                    <div class="hexagon-icone">🏠</div>
-                    <div class="hexagon-numero">#${hex + 1}</div>
-                </div>
-                <div class="hexagon-shadow"></div>
-            `;
-            
-            hexContainer.appendChild(hexBox);
-            
-            // ===== CRIAR CLOSURE PARA CAPTURAR VALORES =====
-            (function(index, hexCont, hexB, c) {
-                // ===== EVENTOS MOUSE =====
-                hexCont.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    if (!c.paga) {
-                        clicarCasaTrilha(index);
-                    }
-                });
+    for (let tela = 0; tela < 8; tela++) {
+        let casasNestaTela = 0;
+        
+        for (let row = 0; row < linhasPerTela; row++) {
+            for (let col = 0; col < colunasPerTela; col++) {
+                if (hex >= totalCasasJogo) break;
+                if (casasNestaTela >= casasPerTela) break;
+                
+                // Posição X e Y dentro da tela
+                const posX = col * espacoX + (row % 2 ? espacoX / 2 : 0) + 20;
+                const posY = row * espacoY + 20 + (tela * altura);
+                
+                const casa = casinhas[hex];
+                if (!casa) break;
+                
+                const hexContainer = document.createElement('div');
+                hexContainer.className = 'hexagon-container';
+                hexContainer.style.left = posX + 'px';
+                hexContainer.style.top = posY + 'px';
+                hexContainer.setAttribute('data-index', hex);
+                
+                const hexBox = document.createElement('div');
+                hexBox.className = 'hexagon-box' + (casa.paga ? ' completada' : '');
+                hexBox.innerHTML = `
+                    <div class="hexagon-front">
+                        <div class="hexagon-icone">🏠</div>
+                        <div class="hexagon-numero">#${hex + 1}</div>
+                    </div>
+                    <div class="hexagon-shadow"></div>
+                `;
+                
+                hexContainer.appendChild(hexBox);
+                
+                // ===== CRIAR CLOSURE PARA CAPTURAR VALORES =====
+                (function(index, hexCont, hexB, c) {
+                    // ===== EVENTOS MOUSE =====
+                    hexCont.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (!c.paga) {
+                            clicarCasaTrilha(index);
+                        }
+                    });
 
-                hexCont.addEventListener('mouseenter', function() {
-                    if (!c.paga) {
+                    hexCont.addEventListener('mouseenter', function() {
+                        if (!c.paga) {
+                            hexB.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
+                        }
+                    });
+
+                    hexCont.addEventListener('mouseleave', function() {
+                        hexB.style.transform = '';
+                    });
+
+                    // ===== EVENTOS TOUCH =====
+                    hexCont.addEventListener('touchstart', function(e) {
+                        e.stopPropagation();
                         hexB.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
-                    }
-                });
+                    }, { passive: true });
 
-                hexCont.addEventListener('mouseleave', function() {
-                    hexB.style.transform = '';
-                });
+                    hexCont.addEventListener('touchend', function(e) {
+                        e.stopPropagation();
+                        if (!c.paga) {
+                            clicarCasaTrilha(index);
+                        }
+                        hexB.style.transform = '';
+                    }, { passive: true });
+                })(hex, hexContainer, hexBox, casa);
 
-                // ===== EVENTOS TOUCH =====
-                hexCont.addEventListener('touchstart', function(e) {
-                    e.stopPropagation();
-                    hexB.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
-                }, { passive: true });
-
-                hexCont.addEventListener('touchend', function(e) {
-                    e.stopPropagation();
-                    if (!c.paga) {
-                        clicarCasaTrilha(index);
-                    }
-                    hexB.style.transform = '';
-                }, { passive: true });
-            })(hex, hexContainer, hexBox, casa);
-
-            container.appendChild(hexContainer);
-            hex++;
+                container.appendChild(hexContainer);
+                hex++;
+                casasNestaTela++;
+            }
         }
+        
+        if (hex >= totalCasasJogo) break;
     }
 }
 
@@ -151,16 +167,20 @@ function clicarCasaTrilha(index) {
         hexBox.classList.add('nova-casa');
         hexContainer.classList.add('clicada');
         
-        // Fazer desaparecer após animação
+        // Fazer desaparecer com animação
         setTimeout(function() {
             if (hexContainer) {
                 hexContainer.style.opacity = '0';
                 hexContainer.style.transform = 'scale(0)';
                 hexContainer.style.pointerEvents = 'none';
+                
+                // MOSTRAR MENSAGEM DEPOIS QUE SUMIR
+                setTimeout(function() {
+                    mostrarMensagem3D(casa);
+                }, 150);
             }
         }, 300);
         
-        mostrarMensagem3D(casa);
         verificarFogosDeArtificio();
         verificarMetaAtingida();
         tocarSomClick();
