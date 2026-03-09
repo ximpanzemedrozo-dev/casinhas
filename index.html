@@ -2,107 +2,237 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Jogo das Casinhas">
-    <title>Jogo das Casinhas - Tabuleiro de Economia 🏠</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo das Casinhas - Tabuleiro de Economia</title>
+    
+    <!-- ===== FIREBASE CDN ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <!-- ===== FIM FIREBASE ===== -->
+    
+    <!-- ===== CSS ===== -->
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="isometrico.css">
-    <link rel="stylesheet" href="game-effects.css">
-    <link rel="stylesheet" href="game-board.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- ===== CONFETTI ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/confetti-js"></script>
 </head>
 <body>
-    <!-- LOGIN SCREEN -->
+    <!-- ===== LOGIN SCREEN ===== -->
     <div id="loginScreen" class="screen active">
         <div class="login-container">
-            <h1>🏠 Jogo das Casinhas</h1>
-            <p>Tabuleiro de Economia</p>
-            
-            <div class="login-form">
-                <input type="email" id="email" placeholder="Email" required>
-                <input type="password" id="password" placeholder="Senha" required>
-                
-                <button id="loginBtn" class="btn-primary">🔑 Entrar</button>
-                <button id="registerBtn" class="btn-secondary">📝 Criar Conta</button>
+            <div class="login-box">
+                <div class="login-header">
+                    <span class="home-icon">🏠</span>
+                    <h1>Jogo das Casinhas</h1>
+                    <p class="subtitle">Tabuleiro de Economia</p>
+                </div>
+
+                <form class="login-form">
+                    <input 
+                        type="email" 
+                        id="email" 
+                        placeholder="seu@email.com" 
+                        required
+                        autocomplete="email"
+                    >
+                    <input 
+                        type="password" 
+                        id="password" 
+                        placeholder="••••••" 
+                        required
+                        autocomplete="current-password"
+                    >
+                    
+                    <div id="loginError" class="error-message"></div>
+
+                    <button type="button" id="loginBtn" class="btn btn-primary">
+                        🔓 Entrar
+                    </button>
+                    
+                    <button type="button" id="registerBtn" class="btn btn-secondary">
+                        📝 Criar Conta
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    <small>Suas dados estão seguros com Firebase</small>
+                </div>
             </div>
-            
-            <p id="loginError" class="error-msg"></p>
         </div>
     </div>
 
-    <!-- CHARACTER SELECT SCREEN -->
+    <!-- ===== CHARACTER SELECT SCREEN ===== -->
     <div id="characterScreen" class="screen">
-        <div class="char-container">
-            <h1>🎮 Escolha seu Dedal</h1>
-            <p>Qual será seu personagem?</p>
+        <div class="character-select-container">
+            <h2>Escolha seu Personagem</h2>
+            <p>Qual será seu companheiro nessa jornada?</p>
             
             <div class="characters-grid">
                 <div class="character-card" data-char="1">
-                    <div class="char-icon">🚗</div>
+                    <span class="character-emoji">🚗</span>
                     <p>Carro Vermelho</p>
                 </div>
                 <div class="character-card" data-char="2">
-                    <div class="char-icon">💎</div>
+                    <span class="character-emoji">💎</span>
                     <p>Chapéu de Seda</p>
                 </div>
                 <div class="character-card" data-char="3">
-                    <div class="char-icon">⌚</div>
+                    <span class="character-emoji">⌚</span>
                     <p>Relógio de Ouro</p>
                 </div>
                 <div class="character-card" data-char="4">
-                    <div class="char-icon">🐶</div>
+                    <span class="character-emoji">🐶</span>
                     <p>Cachorro</p>
                 </div>
                 <div class="character-card" data-char="5">
-                    <div class="char-icon">🎩</div>
+                    <span class="character-emoji">🎩</span>
                     <p>Cartola</p>
                 </div>
                 <div class="character-card" data-char="6">
-                    <div class="char-icon">👑</div>
+                    <span class="character-emoji">👑</span>
                     <p>Coroa</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN GAME SCREEN -->
+    <!-- ===== GAME SCREEN ===== -->
     <div id="gameScreen" class="screen">
         <!-- HEADER -->
-        <header class="interland-header">
+        <header class="game-header">
             <div class="header-left">
-                <div class="logo-section">
-                    <span class="logo-emoji">🏠</span>
-                    <span class="logo-text">Jogo das Casinhas</span>
+                <span id="characterDisplay" class="character-display">🚗</span>
+                <div class="player-info">
+                    <p id="userName" class="user-name">Carro Vermelho</p>
+                    <p class="user-email" id="userEmail"></p>
                 </div>
             </div>
 
-            <div class="header-middle">
-                <div class="progress-mini">
-                    <span class="progress-label">Progresso:</span>
-                    <span class="progress-value" id="headerPercentage">0%</span>
+            <div class="header-center">
+                <div class="progress-bar">
+                    <div id="headerProgressFill" class="progress-fill"></div>
                 </div>
-                <div class="progress-bar-mini">
-                    <div class="progress-fill-mini" id="headerProgressFill"></div>
-                </div>
+                <span id="headerPercentage" class="percentage">0%</span>
             </div>
 
             <div class="header-right">
-                <div class="user-section">
-                    <div class="user-avatar" id="characterDisplay">🚗</div>
-                    <div class="user-name" id="userName">Usuario</div>
-                </div>
-                <button id="adminBtn" class="btn-admin-gear" title="Configuracoes">⚙️</button>
-                <button id="logoutBtn" class="btn-logout">🚪</button>
+                <button id="adminBtn" class="admin-btn">⚙️</button>
+                <button id="logoutBtn" class="logout-btn">🚪</button>
             </div>
         </header>
 
-        <!-- CONTAINER PRINCIPAL -->
-        <div class="main-container">
-            <!-- VALOR FLUTUANTE -->
-            <div class="valor-display" id="valorDisplay">
-                <span class="valor-icon">💰</span>
-                <span class="valor-text">R$ <strong i
-
+        <!-- MAIN CONTENT -->
+        <div class="game-content">
+            <!-- TRILHA DO JOGO -->
+            <div class="game-board">
+                <div id="gameScreen" class="trilha-container"></div>
+            </div>
+
+            <!-- SIDEBAR DE PROGRESSO -->
+            <aside class="sidebar">
+                <div class="progress-section">
+                    <h3>📊 Progresso</h3>
+                    <div class="stats">
+                        <div class="stat">
+                            <label>Casas Abertas:</label>
+                            <span id="casasAbertas" class="stat-value">0</span>
+                        </div>
+                        <div class="stat">
+                            <label>Total de Casas:</label>
+                            <span class="stat-value" id="totalCasas">400</span>
+                        </div>
+                        <div class="stat">
+                            <label>Valor Arrecadado:</label>
+                            <span id="total" class="stat-value">R$ 0,00</span>
+                        </div>
+                        <div class="stat">
+                            <label>Percentual:</label>
+                            <span id="percentage" class="stat-value">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-fill-bar">
+                        <div id="progressFill" class="fill"></div>
+                    </div>
+                </div>
+
+                <div class="meta-section">
+                    <h3>🎯 Meta</h3>
+                    <p id="metaValor" class="meta-valor">R$ 1.000,00</p>
+                    <p class="meta-label">Total a arrecadar</p>
+                </div>
+
+                <div class="valor-display-section">
+                    <div id="valorDisplay" class="valor-display">
+                        <span class="valor-icon">💰</span>
+                        <span class="valor-text">R$ <strong>0,00</strong></span>
+                        <span class="valor-porcentagem">0%</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="game-footer">
+            <p>🏠 <span id="casasAbertasBottom">0</span> / <span id="totalCasasBottom">400</span> casas abertas</p>
+        </footer>
+    </div>
+
+    <!-- ===== CELEBRATION MODAL ===== -->
+    <div id="celebrationModal" class="modal">
+        <div class="modal-content celebration">
+            <button class="close-modal" onclick="fecharCelebracao()">✕</button>
+            <div class="celebration-content">
+                <h2>🎉 PARABÉNS! 🎉</h2>
+                <p id="celebrationMessage">Você conseguiu!</p>
+                <button class="btn btn-primary" onclick="fecharCelebracao()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ADMIN MODAL ===== -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content admin">
+            <button class="close-modal" onclick="document.getElementById('adminModal').classList.remove('show')">✕</button>
+            <h2>⚙️ Painel Admin</h2>
+            
+            <div class="admin-section">
+                <h3>Verificação</h3>
+                <input 
+                    type="password" 
+                    id="adminPassword" 
+                    placeholder="Senha de Admin"
+                >
+                <button class="btn btn-primary" id="verifyAdminBtn">Verificar</button>
+                <div id="adminError" class="error-message"></div>
+            </div>
+
+            <div id="adminPanel" class="admin-panel" style="display: none;">
+                <div class="admin-option">
+                    <h3>Total de Casinhas</h3>
+                    <p>Atual: <span id="totalCasasDisplay">400</span></p>
+                    <input 
+                        type="number" 
+                        id="newTotal" 
+                        placeholder="Novo total"
+                        min="1"
+                    >
+                    <button class="btn btn-primary" id="updateTotalBtn">Atualizar</button>
+                </div>
+
+                <div class="admin-option">
+                    <h3>Resetar Dados</h3>
+                    <p>Limpar todas as casas abertas</p>
+                    <button class="btn btn-danger" id="resetAllBtn">Resetar Tudo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="firebase-config.js"></script>
+    <script src="game-board.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
