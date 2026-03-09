@@ -1,25 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabuleiro das Casinhas 🏠</title>
     <link rel="stylesheet" href="style.css">
-    <title>Houses</title>
 </head>
 <body>
-    <h1>Welcome to the Casinhas!</h1>
-    <div class="house">
-        <img src="house-icon1.png" alt="House Icon 1">
-        <p>This is House 1: A cozy place for relaxation.</p>
+    <div class="container">
+        <header class="header">
+            <h1>🏠 Tabuleiro das Casinhas</h1>
+            <div class="progress-section">
+                <div class="progress-info">
+                    <p>Progresso: <span id="percentage">0</span>%</p>
+                    <p>Total Bancado: R$ <span id="total">0</span>,00</p>
+                    <p>Meta: R$ 1.000,00</p>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="control-panel">
+            <h3>🔑 Painel de Controle</h3>
+            <input type="password" id="masterKey" placeholder="Digite a chave mestra" maxlength="20">
+            <button id="saveBtn" class="btn-save">💾 Salvar no Banco de Dados</button>
+            <button id="resetBtn" class="btn-reset">🔄 Resetar Tudo</button>
+            <p id="statusMsg" class="status-msg"></p>
+        </div>
+
+        <main class="board-container">
+            <div class="board" id="board"></div>
+        </main>
     </div>
-    <div class="house">
-        <img src="house-icon2.png" alt="House Icon 2">
-        <p>This is House 2: The perfect spot for family gatherings.</p>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">&times;</button>
+            <div class="modal-header" id="modalHeader"></div>
+            <div id="modalMessage"></div>
+        </div>
     </div>
-    <div class="house">
-        <img src="house-icon3.png" alt="House Icon 3">
-        <p>This is House 3: A modern design with all amenities.</p>
-    </div>
+
+    <script src="dados-casinhas.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
