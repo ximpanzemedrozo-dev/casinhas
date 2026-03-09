@@ -3,46 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabuleiro das Casinhas 🏠</title>
+    <title>Jogo da Vida - Tabuleiro das Casinhas 🏠</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>🏠 Tabuleiro das Casinhas</h1>
-            <div class="progress-section">
-                <div class="progress-info">
-                    <p>Progresso: <span id="percentage">0</span>%</p>
-                    <p>Total Bancado: R$ <span id="total">0</span>,00</p>
-                    <p>Meta: R$ 1.000,00</p>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <h1>🏠 Jogo da Vida</h1>
+            <p>Tabuleiro das Casinhas</p>
+            
+            <div class="login-form">
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Senha" required>
+                
+                <button id="loginBtn" class="btn-primary">🔑 Entrar</button>
+                <button id="registerBtn" class="btn-secondary">📝 Criar Conta</button>
+            </div>
+            
+            <p id="loginError" class="error-msg"></p>
+        </div>
+    </div>
+
+    <!-- CHARACTER SELECT SCREEN -->
+    <div id="characterScreen" class="screen">
+        <div class="char-container">
+            <h1>🎮 Escolha seu Dedal</h1>
+            <p>Qual será seu personagem?</p>
+            
+            <div class="characters-grid">
+                <div class="character-card" data-char="1">
+                    <div class="char-icon">🚗</div>
+                    <p>Carro Vermelho</p>
                 </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+                <div class="character-card" data-char="2">
+                    <div class="char-icon">💎</div>
+                    <p>Chapéu de Seda</p>
+                </div>
+                <div class="character-card" data-char="3">
+                    <div class="char-icon">⌚</div>
+                    <p>Relógio de Ouro</p>
+                </div>
+                <div class="character-card" data-char="4">
+                    <div class="char-icon">🐶</div>
+                    <p>Cachorro</p>
+                </div>
+                <div class="character-card" data-char="5">
+                    <div class="char-icon">🎩</div>
+                    <p>Cartola</p>
+                </div>
+                <div class="character-card" data-char="6">
+                    <div class="char-icon">👑</div>
+                    <p>Coroa</p>
                 </div>
             </div>
-        </header>
-
-        <div class="control-panel">
-            <h3>🔑 Painel de Controle</h3>
-            <input type="password" id="masterKey" placeholder="Digite a chave mestra" maxlength="20">
-            <button id="saveBtn" class="btn-save">💾 Salvar no Banco de Dados</button>
-            <button id="resetBtn" class="btn-reset">🔄 Resetar Tudo</button>
-            <p id="statusMsg" class="status-msg"></p>
-        </div>
-
-        <main class="board-container">
-            <div class="board" id="board"></div>
-        </main>
-    </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" id="closeModal">&times;</button>
-            <div class="modal-header" id="modalHeader"></div>
-            <div id="modalMessage"></div>
         </div>
     </div>
 
+    <!-- MAIN GAME SCREEN -->
+    <div id="gameScreen" class="screen">
+        <div class="container">
+            <!-- HEADER COM PROFILE -->
+            <header class="header">
+                <div class="profile-info">
+                    <div class="character-display" id="characterDisplay">🚗</div>
+                    <div class="user-info">
+                        <p id="userName">Usuário</p>
+                        <p id="userEmail">email@example.com</p>
+                    </div>
+                </div>
+                
+                <button id="logoutBtn" class="btn-logout">🚪 Sair</button>
+                <button id="adminBtn" class="btn-admin">⚙️ Admin</button>
+            </header>
+
+            <!-- PROGRESSO -->
+            <div class="progress-section">
+                <h2>📊 Seu Progresso</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <p class="stat-label">Progresso</p>
+                        <p class="stat-value" id="percentage">0%</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Total Bancado</p>
+                        <p class="stat-value">R$ <span id="total">0</span></p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-label">Casinhas Abertas</p>
+                        <p class="stat-value"><span id="casasAbertas">0</span>/400</p>
+                    </div>
+                </div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p class="meta-text">Meta: R$ 1.000,00</p>
+                </div>
+            </div>
+
+            <!-- TABULEIRO -->
+            <main class="board-container">
+                <h2>🏠 Tabuleiro das Casinhas</h2>
+                <div class="board" id="board"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content admin-content">
+            <button class="modal-close" id="closeAdmin">&times;</button>
+            <h2>⚙️ Painel Administrativo</h2>
+            
+            <div class="admin-form">
+                <label>Senha de Administrador:</label>
+                <input type="password" id="adminPassword" placeholder="Digite a senha">
+                <button id="verifyAdminBtn" class="btn-primary">Verificar</button>
+            </div>
+            
+            <div id="adminPanel" class="admin-panel" style="display:none;">
+                <div class="admin-section">
+                    <h3>Gerenciar Casinhas</h3>
+                    <p>Total de casinhas: <strong id="totalCasasDisplay">400</strong></p>
+                    
+                    <div class="admin-controls">
+                        <label>Novo total:</label>
+                        <input type="number" id="newTotal" min="1" max="1000" value="400">
+                        <button id="updateTotalBtn" class="btn-success">Atualizar</button>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Ações</h3>
+                    <button id="resetAllBtn" class="btn-danger">🔄 Resetar Todos os Dados</button>
+                    <button id="exportDataBtn" class="btn-info">📥 Exportar Dados</button>
+                </div>
+            </div>
+            
+            <p id="adminError" class="error-msg"></p>
+        </div>
+    </div>
+
+    <!-- CELEBRAÇÃO MODAL -->
+    <div id="celebrationModal" class="modal celebration-modal">
+        <div class="celebration-content">
+            <div class="celebration-icon">🎉</div>
+            <h2 id="celebrationText">META ATINGIDA!</h2>
+            <p id="celebrationMessage">Parabéns! Você economizou R$ 1.000,00!</p>
+            <button class="btn-primary" onclick="fecharCelebracao()">Continuar</button>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"></script>
+    
+    <script src="firebase-config.js"></script>
     <script src="dados-casinhas.js"></script>
     <script src="script.js"></script>
 </body>
