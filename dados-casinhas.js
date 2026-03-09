@@ -62,4 +62,8 @@ function obterMensagem(numero) {
     return { emoji: '🏠', texto: 'Casa ' + numero };
 }
 
+// ===== EXPORTAR FUNÇÕES GLOBAIS =====
 window.obterMensagemAleatoria = obterMensagemAleatoria;
+window.obterMensagem = obterMensagem;
+
+console.log('✅ dados-casinhas.js carregado com sucesso!');
