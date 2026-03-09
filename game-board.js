@@ -1,4 +1,4 @@
-// ===== SISTEMA DE TRILHA DO JOGO =====
+// ===== SISTEMA DE TRILHA DO JOGO INTERLAND =====
 
 let posicaoAtual = 0;
 let totalCasasJogo = 140;
@@ -11,7 +11,7 @@ function inicializarTrilha() {
     }
 
     gameBoard.innerHTML = '';
-    const larguraTrilha = gameBoard.offsetWidth - 100;
+    const larguraTrilha = gameBoard.offsetWidth - 120;
     const espacoPorCasa = larguraTrilha / totalCasasJogo;
 
     // Container da trilha
@@ -43,7 +43,7 @@ function inicializarTrilha() {
 
     // Casas clicaveis
     casinhas.forEach(function(casa, index) {
-        const posX = (index * espacoPorCasa) + 50;
+        const posX = (index * espacoPorCasa) + 60;
         
         const houseDiv = document.createElement('div');
         houseDiv.className = 'house-clickable';
@@ -77,14 +77,23 @@ function clicarCasaTrilha(index) {
     var casa = casinhas[index];
     casa.paga = !casa.paga;
 
-    var houseBox = document.querySelector('[data-index="' + index + '"] .house-box');
+    var houseDiv = document.querySelector('[data-index="' + index + '"]');
+    var houseBox = houseDiv.querySelector('.house-box');
     
     if (casa.paga) {
         houseBox.classList.add('completada');
+        houseBox.classList.add('nova-casa');
+        houseDiv.classList.add('clicada');
+        
         mostrarMensagem3D(casa);
         verificarFogosDeArtificio();
         verificarMetaAtingida();
         tocarSomClick();
+        
+        setTimeout(function() {
+            houseBox.classList.remove('nova-casa');
+            houseDiv.classList.remove('clicada');
+        }, 600);
     } else {
         houseBox.classList.remove('completada');
     }
@@ -103,16 +112,16 @@ function atualizarPosicaoPersonagem() {
     var gameBoard = document.getElementById('gameBoard');
     if (!gameBoard) return;
 
-    var larguraTrilha = gameBoard.offsetWidth - 100;
+    var larguraTrilha = gameBoard.offsetWidth - 120;
     var espacoPorCasa = larguraTrilha / totalCasasJogo;
-    var novaPosicao = (casasCompletas * espacoPorCasa) + 10;
+    var novaPosicao = (casasCompletas * espacoPorCasa) + 20;
 
     var playerMoving = document.getElementById('playerMoving');
     if (playerMoving) {
         playerMoving.style.left = novaPosicao + 'px';
     }
 
-    // Atualizar fade
+    // Atualizar fade (trilha apagando)
     var trackFade = document.getElementById('trackFade');
     if (trackFade) {
         var percentualCaminho = (casasCompletas / totalCasasJogo) * 100;
@@ -138,9 +147,31 @@ function mostrarValorMetaFlutuante() {
     var totalBancado = casasCompletas * VALOR_CASINHA;
     var percentual = Math.round((casasCompletas / totalCasasJogo) * 100);
 
-    var valorMetaEl = document.getElementById('valorMeta');
-    if (valorMetaEl) {
-        valorMetaEl.innerHTML = 'R$ <span class="valor-numero">' + totalBancado.toFixed(2) + '</span> | ' + percentual + '%';
+    // Atualizar valor flutuante
+    var valorDisplay = document.getElementById('valorDisplay');
+    if (valorDisplay) {
+        valorDisplay.innerHTML = `
+            <span class="valor-icon">💰</span>
+            <span class="valor-text">R$ <strong id="valorNumero">${totalBancado.toFixed(2)}</strong></span>
+            <span class="valor-porcentagem">${percentual}%</span>
+        `;
+    }
+
+    // Atualizar header
+    var headerPercentage = document.getElementById('headerPercentage');
+    if (headerPercentage) {
+        headerPercentage.textContent = percentual + '%';
+    }
+
+    var headerProgressFill = document.getElementById('headerProgressFill');
+    if (headerProgressFill) {
+        headerProgressFill.style.width = percentual + '%';
+    }
+
+    // Atualizar casinhas abertas bottom
+    var casasAbertasBottom = document.getElementById('casasAbertasBottom');
+    if (casasAbertasBottom) {
+        casasAbertasBottom.textContent = casasCompletas;
     }
 }
 
