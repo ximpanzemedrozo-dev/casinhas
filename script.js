@@ -9,7 +9,7 @@ const CARACTERES = {
 };
 
 const ADMIN_PASSWORD = "admin123";
-let TOTAL_CASAS = 400;
+let TOTAL_CASAS = 140;
 const VALOR_CASINHA = 2.50;
 
 let casinhas = [];
@@ -181,12 +181,10 @@ function criarTabuleiro() {
         casinhas.push(casa);
     }
 
-    var boardContainer = document.getElementById('board');
-    criarTabuleiro3D(TOTAL_CASAS, boardContainer);
-    
+    inicializarTrilha();
     atualizarProgresso();
     esconderCarregamento();
-    console.log("Tabuleiro 3D criado!");
+    console.log("Trilha do jogo criada!");
 }
 
 // ===== VERIFICAR FOGOS =====
@@ -249,6 +247,8 @@ function atualizarProgresso() {
     document.getElementById('casasAbertas').textContent = casasAbertas;
     document.getElementById('progressFill').style.width = percentual + '%';
     
+    mostrarValorMetaFlutuante();
+    
     if (percentual > 0 && percentual % 10 === 0 && casasAbertas % 10 === 0) {
         mostrarToastProgresso(casasAbertas, TOTAL_CASAS, totalBancado);
     }
@@ -289,7 +289,7 @@ function carregarCasasDoFirebase() {
                     }
                 });
 
-                atualizarTabuleiro3D();
+                inicializarTrilha();
                 atualizarProgresso();
             }
         })
@@ -336,29 +336,8 @@ function resetarTodosDados() {
             casa.paga = false; 
         });
         
-        var elementos = document.querySelectorAll('.casa-3d');
-        elementos.forEach(function(el) { 
-            el.classList.remove('flip'); 
-        });
-        
         atualizarProgresso();
+        inicializarTrilha();
         salvarCasasNoFirebase();
-        document.getElementById('adminModal').classList.remove('show');
-    }
-}
-
-// ===== UI =====
-function mostrarTela(telaId) {
-    var telas = document.querySelectorAll('.screen');
-    telas.forEach(function(screen) {
-        screen.classList.remove('active');
-    });
-    document.getElementById(telaId).classList.add('active');
-}
-
-// ===== FUNÇÕES GLOBAIS =====
-function fecharCelebracao() {
-    document.getElementById('celebrationModal').classList.remove('show');
-}
-
-window.fecharCelebracao = fecharCelebracao;
+        document.getElementById('adminModal').classList.remove*
+
