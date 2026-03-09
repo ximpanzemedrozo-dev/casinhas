@@ -9,7 +9,6 @@ const CARACTERES = {
 };
 
 const ADMIN_PASSWORD = "admin123";
-
 let TOTAL_CASAS = 400;
 const VALOR_CASINHA = 2.50;
 
@@ -20,7 +19,7 @@ let ultimoCasasAbertas = 0;
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
-    auth.onAuthStateChanged(function(user) {
+    firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
             usuarioLogado = user;
             carregarDadosUsuario();
@@ -34,8 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('registerBtn').addEventListener('click', fazerRegistro);
     document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
     
-    var cards = document.querySelectorAll('.character-card');
-    cards.forEach(function(card) {
+    document.querySelectorAll('.character-card').forEach(function(card) {
         card.addEventListener('click', selecionarCaractere);
     });
     
@@ -63,7 +61,7 @@ function fazerLogin() {
         return;
     }
 
-    auth.signInWithEmailAndPassword(email, password)
+    firebase.auth().signInWithEmailAndPassword(email, password)
         .then(function() {
             errorMsg.textContent = '';
         })
@@ -87,7 +85,7 @@ function fazerRegistro() {
         return;
     }
 
-    auth.createUserWithEmailAndPassword(email, password)
+    firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(function() {
             errorMsg.textContent = '✅ Conta criada! Faça login agora.';
             setTimeout(function() {
@@ -100,7 +98,7 @@ function fazerRegistro() {
 }
 
 function fazerLogout() {
-    auth.signOut().then(function() {
+    firebase.auth().signOut().then(function() {
         usuarioLogado = null;
         casinhas = [];
         mostrarTela('loginScreen');
@@ -111,7 +109,7 @@ function fazerLogout() {
 
 // ===== DADOS DO USUÁRIO =====
 function carregarDadosUsuario() {
-    db.collection('usuarios').doc(usuarioLogado.uid).get()
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).get()
         .then(function(doc) {
             if (doc.exists) {
                 var dados = doc.data();
@@ -131,11 +129,10 @@ function carregarDadosUsuario() {
 }
 
 function selecionarCaractere(e) {
-    var characterId = e.currentTarget.dataset.char;
+    var characterId = e.currentTarget.getAttribute('data-char');
     caracterSelecionado = parseInt(characterId);
     
-    var cards = document.querySelectorAll('.character-card');
-    cards.forEach(function(card) {
+    document.querySelectorAll('.character-card').forEach(function(card) {
         card.classList.remove('selected');
     });
     e.currentTarget.classList.add('selected');
@@ -150,10 +147,10 @@ function selecionarCaractere(e) {
 }
 
 function salvarCaractereNoFirebase(charId) {
-    db.collection('usuarios').doc(usuarioLogado.uid).set({
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).set({
         caractere: charId,
         email: usuarioLogado.email,
-        dataCriacao: new Date()
+        dataCriacao: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true })
         .catch(function(error) {
             console.error('Erro ao salvar caractere:', error);
@@ -186,11 +183,13 @@ function criarTabuleiro() {
         var elemento = document.createElement('div');
         elemento.className = 'casa grupo-' + casa.grupo;
         elemento.innerHTML = '<div class="casa-icone">' + casa.mensagem.emoji + '</div><div class="casa-numero">#' + i + '</div><div class="casa-valor">R$ ' + casa.valor.toFixed(2) + '</div>';
-        elemento.addEventListener('click', (function(index) {
-            return function() {
-                clicarCasa(index);
-            };
-        })(i - 1));
+        
+        elemento.setAttribute('data-index', i - 1);
+        elemento.addEventListener('click', function(ev) {
+            var index = parseInt(ev.currentTarget.getAttribute('data-index'));
+            clicarCasa(index);
+        });
+        
         board.appendChild(elemento);
     }
 
@@ -199,8 +198,10 @@ function criarTabuleiro() {
 }
 
 function clicarCasa(index) {
-    var elemento = document.querySelectorAll('.casa')[index];
+    var elementos = document.querySelectorAll('.casa');
+    var elemento = elementos[index];
     var casa = casinhas[index];
+    
     casa.paga = !casa.paga;
     
     if (casa.paga) {
@@ -216,7 +217,10 @@ function clicarCasa(index) {
 }
 
 function verificarFogosDeArtificio() {
-    var casasAbertas = casinhas.filter(function(c) { return c.paga; }).length;
+    var casasAbertas = 0;
+    casinhas.forEach(function(c) {
+        if (c.paga) casasAbertas++;
+    });
     
     if (casasAbertas > 0 && casasAbertas % 10 === 0 && casasAbertas !== ultimoCasasAbertas) {
         ultimoCasasAbertas = casasAbertas;
@@ -257,7 +261,11 @@ function tocarSomSucesso() {
 }
 
 function verificarMetaAtingida() {
-    var casasAbertas = casinhas.filter(function(c) { return c.paga; }).length;
+    var casasAbertas = 0;
+    casinhas.forEach(function(c) {
+        if (c.paga) casasAbertas++;
+    });
+    
     var totalBancado = casasAbertas * VALOR_CASINHA;
     
     if (casasAbertas >= TOTAL_CASAS) {
@@ -287,7 +295,11 @@ function fecharCelebracao() {
 }
 
 function atualizarProgresso() {
-    var casasAbertas = casinhas.filter(function(c) { return c.paga; }).length;
+    var casasAbertas = 0;
+    casinhas.forEach(function(c) {
+        if (c.paga) casasAbertas++;
+    });
+    
     var totalBancado = casasAbertas * VALOR_CASINHA;
     var percentual = Math.round((casasAbertas / TOTAL_CASAS) * 100);
 
@@ -301,9 +313,104 @@ function atualizarProgresso() {
 function salvarCasasNoFirebase() {
     if (!usuarioLogado) return;
 
-    var casasPagas = casinhas
-        .filter(function(c) { return c.paga; })
-        .map(function(c) { return c.numero; });
+    var casasPagas = [];
+    casinhas.forEach(function(c) {
+        if (c.paga) casasPagas.push(c.numero);
+    });
 
-    db.collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('cas*
-
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').set({
+        casasPagas: casasPagas,
+        dataAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+    })
+        .catch(function(error) {
+            console.error('Erro ao salvar:', error);
+        });
+}
+
+function carregarCasasDoFirebase() {
+    if (!usuarioLogado) return;
+
+    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').get()
+        .then(function(doc) {
+            if (doc.exists) {
+                var dados = doc.data();
+                var casasPagas = dados.casasPagas || [];
+                
+                casinhas.forEach(function(casa) {
+                    if (casasPagas.indexOf(casa.numero) > -1) {
+                        casa.paga = true;
+                    }
+                });
+
+                var elementos = document.querySelectorAll('.casa');
+                elementos.forEach(function(el, index) {
+                    if (casinhas[index].paga) {
+                        el.classList.add('paga');
+                    } else {
+                        el.classList.remove('paga');
+                    }
+                });
+
+                atualizarProgresso();
+            }
+        })
+        .catch(function(error) {
+            console.error('Erro ao carregar:', error);
+        });
+}
+
+// ===== ADMIN =====
+function verificarAdminPassword() {
+    var senha = document.getElementById('adminPassword').value;
+    var errorMsg = document.getElementById('adminError');
+    
+    if (senha === ADMIN_PASSWORD) {
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('totalCasasDisplay').textContent = TOTAL_CASAS;
+        errorMsg.textContent = '';
+    } else {
+        errorMsg.textContent = '❌ Senha de admin incorreta!';
+    }
+}
+
+function atualizarTotalCasas() {
+    var novoTotal = parseInt(document.getElementById('newTotal').value);
+    var errorMsg = document.getElementById('adminError');
+    
+    if (!novoTotal || novoTotal < 1) {
+        errorMsg.textContent = '❌ Digite um número válido!';
+        return;
+    }
+    
+    TOTAL_CASAS = novoTotal;
+    errorMsg.textContent = '✅ Total atualizado!';
+    
+    setTimeout(function() {
+        criarTabuleiro();
+        document.getElementById('adminModal').classList.remove('show');
+    }, 1000);
+}
+
+function resetarTodosDados() {
+    if (confirm('⚠️ Tem certeza? Isso apagará TODOS os dados!')) {
+        casinhas.forEach(function(casa) { casa.paga = false; });
+        
+        var elementos = document.querySelectorAll('.casa');
+        elementos.forEach(function(el) { el.classList.remove('paga'); });
+        
+        atualizarProgresso();
+        salvarCasasNoFirebase();
+        document.getElementById('adminModal').classList.remove('show');
+    }
+}
+
+// ===== UI =====
+function mostrarTela(telaId) {
+    var telas = document.querySelectorAll('.screen');
+    telas.forEach(function(screen) {
+        screen.classList.remove('active');
+    });
+    document.getElementById(telaId).classList.add('active');
+}
+
+window.fecharCelebracao = fecharCelebracao;
