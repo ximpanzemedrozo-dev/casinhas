@@ -7,18 +7,28 @@ function vibraTabuleiro() {
 }
 
 function mostrarMensagem3D(casa) {
+    console.log('🎯 mostrarMensagem3D chamada para casa: ' + casa.numero);
+    
+    if (typeof obterMensagemAleatoria === 'undefined') {
+        console.error('obterMensagemAleatoria nao está definida!');
+        return;
+    }
+    
     var mensagem = obterMensagemAleatoria();
-    console.log('Casa completada: #' + casa.numero + ' - ' + mensagem.texto);
+    console.log('📢 Mensagem: ' + mensagem.texto);
     
     // Mostrar modal com mensagem
     mostrarModalMensagem(mensagem);
 }
 
 function mostrarModalMensagem(mensagem) {
-    // Criar modal se não existir
+    console.log('🎨 Abrindo modal com mensagem: ' + mensagem.texto);
+    
+    // Verificar se modal existe
     var modal = document.getElementById('messageModal');
     
     if (!modal) {
+        console.log('📦 Criando novo modal...');
         modal = document.createElement('div');
         modal.id = 'messageModal';
         modal.className = 'message-modal';
@@ -33,11 +43,21 @@ function mostrarModalMensagem(mensagem) {
         </div>
     `;
     
+    console.log('✨ Adicionando classe show...');
+    
+    // Remover classe show se existir
+    modal.classList.remove('show');
+    
+    // Forçar reflow para disparar animação
+    void modal.offsetWidth;
+    
     // Mostrar
     modal.classList.add('show');
+    console.log('✅ Modal mostrado!');
     
     // Esconder após 3 segundos
     setTimeout(function() {
+        console.log('⏱️ Escondendo modal...');
         modal.classList.remove('show');
     }, 3000);
 }
@@ -67,9 +87,14 @@ function mostrarVitoria(totalBancado) {
     }
 }
 
+// ===== EXPORTAR FUNÇÕES GLOBAIS =====
 window.mostrarMensagem3D = mostrarMensagem3D;
+window.mostrarModalMensagem = mostrarModalMensagem;
 window.mostrarMilestone = mostrarMilestone;
 window.mostrarToastProgresso = mostrarToastProgresso;
 window.mostrarCarregamento = mostrarCarregamento;
 window.esconderCarregamento = esconderCarregamento;
 window.mostrarVitoria = mostrarVitoria;
+window.vibraTabuleiro = vibraTabuleiro;
+
+console.log('✅ game-animations.js carregado com sucesso!');
