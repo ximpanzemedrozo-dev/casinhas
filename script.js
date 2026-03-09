@@ -20,15 +20,31 @@ let ultimoCasasAbertas = 0;
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOMContentLoaded disparado');
+    console.log('📋 Buscando elementos do DOM...');
+    
+    var loginBtn = document.getElementById('loginBtn');
+    var registerBtn = document.getElementById('registerBtn');
+    
+    console.log('🔘 loginBtn encontrado:', loginBtn);
+    console.log('🔘 registerBtn encontrado:', registerBtn);
+    
+    if (!loginBtn) {
+        console.error('❌ ERRO: Botão loginBtn não encontrado!');
+    }
+    if (!registerBtn) {
+        console.error('❌ ERRO: Botão registerBtn não encontrado!');
+    }
+    
     inicializarEventos();
     
+    console.log('📡 Configurando Firebase listener...');
     firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
-            console.log('👤 Usuário logado: ' + user.email);
+            console.log('✅ Usuário logado: ' + user.email);
             usuarioLogado = user;
             carregarDadosUsuario();
         } else {
-            console.log('👤 Nenhum usuário logado');
+            console.log('❌ Nenhum usuário logado');
             mostrarTela('loginScreen');
         }
     });
@@ -37,51 +53,119 @@ document.addEventListener('DOMContentLoaded', function() {
 function inicializarEventos() {
     console.log('🎯 Inicializando eventos...');
     
-    document.getElementById('loginBtn').addEventListener('click', fazerLogin);
-    document.getElementById('registerBtn').addEventListener('click', fazerRegistro);
-    document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
+    var loginBtn = document.getElementById('loginBtn');
+    var registerBtn = document.getElementById('registerBtn');
+    var logoutBtn = document.getElementById('logoutBtn');
+    
+    if (loginBtn) {
+        console.log('➕ Adicionando evento ao loginBtn');
+        loginBtn.addEventListener('click', function(e) {
+            console.log('🔐 Clique no botão ENTRAR');
+            e.preventDefault();
+            fazerLogin();
+        });
+    } else {
+        console.error('❌ loginBtn não encontrado para adicionar evento!');
+    }
+    
+    if (registerBtn) {
+        console.log('➕ Adicionando evento ao registerBtn');
+        registerBtn.addEventListener('click', function(e) {
+            console.log('📝 Clique no botão CRIAR CONTA');
+            e.preventDefault();
+            fazerRegistro();
+        });
+    } else {
+        console.error('❌ registerBtn não encontrado para adicionar evento!');
+    }
+    
+    if (logoutBtn) {
+        console.log('➕ Adicionando evento ao logoutBtn');
+        logoutBtn.addEventListener('click', fazerLogout);
+    }
     
     document.querySelectorAll('.character-card').forEach(function(card) {
         card.addEventListener('click', selecionarCaractere);
     });
     
-    document.getElementById('adminBtn').addEventListener('click', function() {
-        document.getElementById('adminModal').classList.add('show');
-    });
+    var adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', function() {
+            document.getElementById('adminModal').classList.add('show');
+        });
+    }
     
-    document.getElementById('closeAdmin').addEventListener('click', function() {
-        document.getElementById('adminModal').classList.remove('show');
-    });
+    var closeAdmin = document.getElementById('closeAdmin');
+    if (closeAdmin) {
+        closeAdmin.addEventListener('click', function() {
+            document.getElementById('adminModal').classList.remove('show');
+        });
+    }
     
-    document.getElementById('verifyAdminBtn').addEventListener('click', verificarAdminPassword);
-    document.getElementById('updateTotalBtn').addEventListener('click', atualizarTotalCasas);
-    document.getElementById('resetAllBtn').addEventListener('click', resetarTodosDados);
+    var verifyAdminBtn = document.getElementById('verifyAdminBtn');
+    if (verifyAdminBtn) {
+        verifyAdminBtn.addEventListener('click', verificarAdminPassword);
+    }
+    
+    var updateTotalBtn = document.getElementById('updateTotalBtn');
+    if (updateTotalBtn) {
+        updateTotalBtn.addEventListener('click', atualizarTotalCasas);
+    }
+    
+    var resetAllBtn = document.getElementById('resetAllBtn');
+    if (resetAllBtn) {
+        resetAllBtn.addEventListener('click', resetarTodosDados);
+    }
+    
+    console.log('✅ Eventos inicializados');
 }
 
 // ===== AUTENTICAÇÃO =====
 function fazerLogin() {
+    console.log('═══════════════════════════════════════');
+    console.log('🔐 FUNÇÃO FAZER LOGIN CHAMADA');
+    console.log('═══════════════════════════════════════');
+    
     var email = document.getElementById('email').value;
     var password = document.getElementById('password').value;
     var errorMsg = document.getElementById('loginError');
 
+    console.log('📧 Email: ' + email);
+    console.log('🔑 Senha: ' + (password ? '***' : 'vazia'));
+
     if (!email || !password) {
+        console.error('❌ Email ou senha vazios!');
         errorMsg.textContent = 'Preencha email e senha!';
         return;
     }
 
+    console.log('📡 Enviando credenciais ao Firebase...');
+    
     firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(function() {
+        .then(function(result) {
+            console.log('✅ LOGIN BEM-SUCEDIDO!');
+            console.log('👤 Usuário: ' + result.user.email);
             errorMsg.textContent = '';
         })
         .catch(function(error) {
+            console.error('❌ ERRO DE LOGIN:');
+            console.error('Código: ' + error.code);
+            console.error('Mensagem: ' + error.message);
             errorMsg.textContent = 'Erro: ' + error.message;
         });
 }
 
 function fazerRegistro() {
+    console.log('═══════════════════════════════════════');
+    console.log('📝 FUNÇÃO FAZER REGISTRO CHAMADA');
+    console.log('═══════════════════════════════════════');
+    
     var email = document.getElementById('email').value;
     var password = document.getElementById('password').value;
     var errorMsg = document.getElementById('loginError');
+
+    console.log('📧 Email: ' + email);
+    console.log('🔑 Senha: ' + (password ? '***' : 'vazia'));
 
     if (!email || !password) {
         errorMsg.textContent = 'Preencha email e senha!';
@@ -93,25 +177,34 @@ function fazerRegistro() {
         return;
     }
 
+    console.log('📡 Criando conta no Firebase...');
+
     firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then(function() {
+        .then(function(result) {
+            console.log('✅ CONTA CRIADA COM SUCESSO!');
+            console.log('👤 Usuário: ' + result.user.email);
             errorMsg.textContent = 'Conta criada! Faca login agora.';
             setTimeout(function() {
                 document.getElementById('loginBtn').click();
             }, 2000);
         })
         .catch(function(error) {
+            console.error('❌ ERRO DE REGISTRO:');
+            console.error('Código: ' + error.code);
+            console.error('Mensagem: ' + error.message);
             errorMsg.textContent = 'Erro: ' + error.message;
         });
 }
 
 function fazerLogout() {
+    console.log('🚪 Fazendo logout...');
     firebase.auth().signOut().then(function() {
         usuarioLogado = null;
         casinhas = [];
         mostrarTela('loginScreen');
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
+        console.log('✅ Logout realizado');
     });
 }
 
@@ -176,7 +269,7 @@ function atualizarPerfilUI() {
 
 // ===== TABULEIRO =====
 function criarTabuleiro() {
-    console.log('🎮 Criando tabuleiro com 400 casas...');
+    console.log('🎮 Criando tabuleiro com ' + TOTAL_CASAS + ' casas...');
     casinhas = [];
 
     for (var i = 1; i <= TOTAL_CASAS; i++) {
@@ -194,10 +287,8 @@ function criarTabuleiro() {
     console.log('✅ Tabuleiro criado com ' + casinhas.length + ' casas');
     console.log('🎯 Chamando inicializarTrilha...');
     
-    // VERIFICAR SE FUNÇÃO EXISTE
     if (typeof inicializarTrilha !== 'function') {
         console.error('❌ inicializarTrilha NÃO É UMA FUNÇÃO!');
-        console.error('Tipo: ' + typeof inicializarTrilha);
         return;
     }
     
@@ -381,6 +472,7 @@ function resetarTodosDados() {
 
 // ===== UI =====
 function mostrarTela(telaId) {
+    console.log('📺 Mostrando tela: ' + telaId);
     var telas = document.querySelectorAll('.screen');
     telas.forEach(function(screen) {
         screen.classList.remove('active');
@@ -440,7 +532,6 @@ function mostrarValorMetaFlutuante() {
     var totalBancado = casasCompletas * VALOR_CASINHA;
     var percentual = Math.round((casasCompletas / TOTAL_CASAS) * 100);
 
-    // Atualizar valor flutuante
     var valorDisplay = document.getElementById('valorDisplay');
     if (valorDisplay) {
         valorDisplay.innerHTML = `
@@ -450,7 +541,6 @@ function mostrarValorMetaFlutuante() {
         `;
     }
 
-    // Atualizar header
     var headerPercentage = document.getElementById('headerPercentage');
     if (headerPercentage) {
         headerPercentage.textContent = percentual + '%';
