@@ -9,57 +9,62 @@ function vibraTabuleiro() {
 function mostrarMensagem3D(casa) {
     console.log('🎯 mostrarMensagem3D chamada para casa: ' + casa.numero);
     
-    if (typeof obterMensagemAleatoria === 'undefined') {
-        console.error('obterMensagemAleatoria nao está definida!');
-        return;
+    try {
+        var mensagem = obterMensagemAleatoria();
+        console.log('📢 Mensagem obtida: ' + mensagem.texto);
+        
+        // Mostrar modal com mensagem
+        mostrarModalMensagem(mensagem);
+    } catch (error) {
+        console.error('❌ Erro ao obter mensagem:', error);
     }
-    
-    var mensagem = obterMensagemAleatoria();
-    console.log('📢 Mensagem: ' + mensagem.texto);
-    
-    // Mostrar modal com mensagem
-    mostrarModalMensagem(mensagem);
 }
 
 function mostrarModalMensagem(mensagem) {
     console.log('🎨 Abrindo modal com mensagem: ' + mensagem.texto);
     
-    // Verificar se modal existe
-    var modal = document.getElementById('messageModal');
-    
-    if (!modal) {
-        console.log('📦 Criando novo modal...');
-        modal = document.createElement('div');
-        modal.id = 'messageModal';
-        modal.className = 'message-modal';
-        document.body.appendChild(modal);
-    }
-    
-    // Atualizar conteúdo
-    modal.innerHTML = `
-        <div class="message-content">
-            <div class="message-emoji">${mensagem.emoji}</div>
-            <p class="message-text">${mensagem.texto}</p>
-        </div>
-    `;
-    
-    console.log('✨ Adicionando classe show...');
-    
-    // Remover classe show se existir
-    modal.classList.remove('show');
-    
-    // Forçar reflow para disparar animação
-    void modal.offsetWidth;
-    
-    // Mostrar
-    modal.classList.add('show');
-    console.log('✅ Modal mostrado!');
-    
-    // Esconder após 3 segundos
-    setTimeout(function() {
-        console.log('⏱️ Escondendo modal...');
+    try {
+        // Verificar se modal existe
+        var modal = document.getElementById('messageModal');
+        
+        if (!modal) {
+            console.log('📦 Criando novo modal...');
+            modal = document.createElement('div');
+            modal.id = 'messageModal';
+            modal.className = 'message-modal';
+            document.body.appendChild(modal);
+        }
+        
+        // Atualizar conteúdo
+        modal.innerHTML = `
+            <div class="message-content">
+                <div class="message-emoji">${mensagem.emoji}</div>
+                <p class="message-text">${mensagem.texto}</p>
+            </div>
+        `;
+        
+        console.log('✨ Modal criado com conteúdo');
+        
+        // Remover classe show se existir
         modal.classList.remove('show');
-    }, 3000);
+        
+        // Forçar reflow para disparar animação
+        void modal.offsetWidth;
+        
+        // Mostrar
+        modal.classList.add('show');
+        console.log('✅ Modal mostrado na tela!');
+        
+        // Esconder após 3 segundos
+        setTimeout(function() {
+            console.log('⏱️ Escondendo modal...');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }, 3000);
+    } catch (error) {
+        console.error('❌ Erro ao mostrar modal:', error);
+    }
 }
 
 function mostrarMilestone(casasAbertas) {
