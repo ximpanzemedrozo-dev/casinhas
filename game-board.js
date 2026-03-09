@@ -2,7 +2,6 @@
 
 let posicaoAtual = 0;
 let totalCasasJogo = 400;
-let casasVisiveis = {};
 let ultimaCasaMostrada = -1;
 
 function inicializarTrilha() {
@@ -60,27 +59,25 @@ function gerarProximasHexagons() {
     const pathContainer = document.getElementById('pathContainer');
     if (!pathContainer) return;
 
-    // Limpar casas visíveis antigas
-    Object.keys(casasVisiveis).forEach(function(key) {
-        var elemento = document.querySelector('[data-index="' + key + '"]');
-        if (elemento) {
-            elemento.remove();
-        }
-    });
-    casasVisiveis = {};
-
-    // Determinar qual leva gerar (0-49, 50-99, 100-149, etc)
+    // Contar casas completas
     var casasCompletas = 0;
     casinhas.forEach(function(c) {
         if (c.paga) casasCompletas++;
+    });
+
+    // LIMPAR TODOS OS HEXÁGONOS ANTIGOS
+    var todosHexagons = pathContainer.querySelectorAll('.hexagon-container');
+    todosHexagons.forEach(function(hex) {
+        hex.remove();
     });
 
     var levaAtual = Math.floor(casasCompletas / 50);
     var inicioLeva = levaAtual * 50;
     var fimLeva = Math.min(inicioLeva + 50, totalCasasJogo);
 
+    console.log('Gerando leva ' + levaAtual + ' (casas ' + inicioLeva + ' a ' + (fimLeva - 1) + ')');
+
     // Grid OTIMIZADO: 10 colunas x 5 linhas = 50 casas
-    const tamanhoHex = 60;
     const espacoX = 70;
     const espacoY = 90;
     
@@ -157,10 +154,11 @@ function gerarProximasHexagons() {
             })(indiceGlobal, hexContainer, hexBox, casa);
 
             pathContainer.appendChild(hexContainer);
-            casasVisiveis[indiceGlobal] = true;
             hexNaTela++;
         }
     }
+
+    console.log('Total de hexágonos na tela: ' + hexNaTela);
 }
 
 function clicarCasaTrilha(index) {
@@ -184,7 +182,7 @@ function clicarCasaTrilha(index) {
         verificarMetaAtingida();
         tocarSomClick();
         
-        // AGUARDAR A ANIMAÇÃO E DEPOIS MOSTRAR MENSAGEM
+        // SUMIR A CASINHA
         setTimeout(function() {
             if (hexContainer) {
                 hexContainer.style.opacity = '0';
@@ -195,27 +193,35 @@ function clicarCasaTrilha(index) {
         
         // MOSTRAR MENSAGEM DEPOIS QUE SUMIR
         setTimeout(function() {
-            mostrarMensagem3D(casa);
-            
-            // VERIFICAR SE PRECISA GERAR NOVA LEVA
-            var casasCompletas = 0;
-            casinhas.forEach(function(c) {
-                if (c.paga) casasCompletas++;
-            });
-            
-            // Se chegou em múltiplo de 50, gerar próximas casas
-            if (casasCompletas % 50 === 0 && casasCompletas > 0 && casasCompletas < totalCasasJogo) {
-                setTimeout(function() {
-                    gerarProximasHexagons();
-                    atualizarPosicaoPersonagem();
-                }, 500);
+            console.log('Chamando mostrarMensagem3D para casa ' + index);
+            if (window.mostrarMensagem3D) {
+                window.mostrarMensagem3D(casa);
+            } else {
+                console.error('mostrarMensagem3D nao encontrada!');
             }
-        }, 400);
+        }, 500);
         
         setTimeout(function() {
             hexBox.classList.remove('nova-casa');
             hexContainer.classList.remove('clicada');
         }, 600);
+        
+        // VERIFICAR SE PRECISA GERAR NOVA LEVA
+        setTimeout(function() {
+            var casasCompletas = 0;
+            casinhas.forEach(function(c) {
+                if (c.paga) casasCompletas++;
+            });
+            
+            console.log('Casas completas: ' + casasCompletas);
+            
+            // Se chegou em múltiplo de 50, gerar próximas casas
+            if (casasCompletas % 50 === 0 && casasCompletas > 0 && casasCompletas < totalCasasJogo) {
+                console.log('Gerando próximas 50 casas!');
+                gerarProximasHexagons();
+                atualizarPosicaoPersonagem();
+            }
+        }, 700);
     } else {
         hexBox.classList.remove('completada');
         hexContainer.style.opacity = '1';
