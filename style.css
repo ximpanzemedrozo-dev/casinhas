@@ -14,6 +14,8 @@ body {
     color: #fff;
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .screen {
@@ -161,6 +163,7 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     color: #333;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .character-card:hover {
@@ -185,7 +188,7 @@ body {
     font-size: 0.9em;
 }
 
-/* ===== HEADER INTERLAND ===== */
+/* ===== HEADER ===== */
 .interland-header {
     background: linear-gradient(90deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
     padding: 15px 30px;
@@ -295,6 +298,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-admin-gear:hover {
@@ -317,6 +321,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-logout:hover {
@@ -388,7 +393,7 @@ body {
 
 .game-board-container {
     width: 100%;
-    max-width: 1000px;
+    max-width: 1200px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 20px;
     padding: 30px;
@@ -473,6 +478,7 @@ body {
     color: #fff;
     font-size: 2.5em;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .modal-close:hover {
