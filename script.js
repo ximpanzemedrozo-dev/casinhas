@@ -8,8 +8,8 @@ const CARACTERES = {
     6: { nome: 'Coroa', emoji: '👑' }
 };
 
-const ADMIN_PASSWORD = "admin123";
-let TOTAL_CASAS = 140;
+const ADMIN_PASSWORD = "VIVIANE";
+let TOTAL_CASAS = 400;
 const VALOR_CASINHA = 2.50;
 
 let casinhas = [];
@@ -32,31 +32,25 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function inicializarEventos() {
-    try {
-        document.getElementById('loginBtn').addEventListener('click', fazerLogin);
-        document.getElementById('registerBtn').addEventListener('click', fazerRegistro);
-        document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
-        
-        document.querySelectorAll('.character-card').forEach(function(card) {
-            card.addEventListener('click', selecionarCaractere);
-        });
-        
-        document.getElementById('adminBtn').addEventListener('click', function() {
-            document.getElementById('adminModal').classList.add('show');
-        });
-        
-        document.getElementById('closeAdmin').addEventListener('click', function() {
-            document.getElementById('adminModal').classList.remove('show');
-        });
-        
-        document.getElementById('verifyAdminBtn').addEventListener('click', verificarAdminPassword);
-        document.getElementById('updateTotalBtn').addEventListener('click', atualizarTotalCasas);
-        document.getElementById('resetAllBtn').addEventListener('click', resetarTodosDados);
-        
-        console.log('Eventos inicializados com sucesso!');
-    } catch (error) {
-        console.error('Erro ao inicializar eventos:', error);
-    }
+    document.getElementById('loginBtn').addEventListener('click', fazerLogin);
+    document.getElementById('registerBtn').addEventListener('click', fazerRegistro);
+    document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
+    
+    document.querySelectorAll('.character-card').forEach(function(card) {
+        card.addEventListener('click', selecionarCaractere);
+    });
+    
+    document.getElementById('adminBtn').addEventListener('click', function() {
+        document.getElementById('adminModal').classList.add('show');
+    });
+    
+    document.getElementById('closeAdmin').addEventListener('click', function() {
+        document.getElementById('adminModal').classList.remove('show');
+    });
+    
+    document.getElementById('verifyAdminBtn').addEventListener('click', verificarAdminPassword);
+    document.getElementById('updateTotalBtn').addEventListener('click', atualizarTotalCasas);
+    document.getElementById('resetAllBtn').addEventListener('click', resetarTodosDados);
 }
 
 // ===== AUTENTICAÇÃO =====
@@ -183,7 +177,7 @@ function criarTabuleiro() {
             valor: VALOR_CASINHA,
             paga: false,
             grupo: Math.floor((i - 1) / 50) % 8,
-            mensagem: obterMensagem(i)
+            mensagem: { emoji: '🏠', texto: 'Casa ' + i }
         };
 
         casinhas.push(casa);
@@ -192,7 +186,7 @@ function criarTabuleiro() {
     inicializarTrilha();
     atualizarProgresso();
     esconderCarregamento();
-    console.log("Trilha do jogo criada!");
+    console.log("Trilha do jogo criada com 400 casas!");
 }
 
 // ===== VERIFICAR FOGOS =====
@@ -202,7 +196,7 @@ function verificarFogosDeArtificio() {
         if (c.paga) casasAbertas++;
     });
     
-    if (casasAbertas > 0 && casasAbertas % 10 === 0 && casasAbertas !== ultimoCasasAbertas) {
+    if (casasAbertas > 0 && casasAbertas % 40 === 0 && casasAbertas !== ultimoCasasAbertas) {
         ultimoCasasAbertas = casasAbertas;
         lancarFogos();
         mostrarMilestone(casasAbertas);
@@ -263,10 +257,6 @@ function atualizarProgresso() {
     if (progressFill) progressFill.style.width = percentual + '%';
     
     mostrarValorMetaFlutuante();
-    
-    if (percentual > 0 && percentual % 10 === 0 && casasAbertas % 10 === 0) {
-        mostrarToastProgresso(casasAbertas, TOTAL_CASAS, totalBancado);
-    }
 }
 
 // ===== FIREBASE =====
