@@ -109,6 +109,8 @@ function fazerLogout() {
 
 // ===== DADOS DO USUÁRIO =====
 function carregarDadosUsuario() {
+    mostrarCarregamento();
+    
     firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).get()
         .then(function(doc) {
             if (doc.exists) {
@@ -164,7 +166,8 @@ function atualizarPerfilUI() {
 }
 
 // ===== TABULEIRO =====
-function criarTabuleiro()casinhas = [];
+function criarTabuleiro() {
+    casinhas = [];
 
     for (var i = 1; i <= TOTAL_CASAS; i++) {
         var casa = {
@@ -182,28 +185,11 @@ function criarTabuleiro()casinhas = [];
     criarTabuleiro3D(TOTAL_CASAS, boardContainer);
     
     atualizarProgresso();
+    esconderCarregamento();
     console.log("✅ Tabuleiro 3D criado!");
 }
 
-function clicarCasa(index) {
-    var elementos = document.querySelectorAll('.casa');
-    var elemento = elementos[index];
-    var casa = casinhas[index];
-    
-    casa.paga = !casa.paga;
-    
-    if (casa.paga) {
-        elemento.classList.add('paga');
-        verificarFogosDeArtificio();
-        verificarMetaAtingida();
-    } else {
-        elemento.classList.remove('paga');
-    }
-    
-    atualizarProgresso();
-    salvarCasasNoFirebase();
-}
-
+// ===== VERIFICAR FOGOS =====
 function verificarFogosDeArtificio() {
     var casasAbertas = 0;
     casinhas.forEach(function(c) {
@@ -213,41 +199,25 @@ function verificarFogosDeArtificio() {
     if (casasAbertas > 0 && casasAbertas % 10 === 0 && casasAbertas !== ultimoCasasAbertas) {
         ultimoCasasAbertas = casasAbertas;
         lancarFogos();
+        mostrarMilestone(casasAbertas);
     }
 }
 
 function lancarFogos() {
-    confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-    });
+    vibraTabuleiro();
     
-    tocarSomSucesso();
-}
-
-function tocarSomSucesso() {
-    try {
-        var audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        var oscillator = audioContext.createOscillator();
-        var gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.value = 800;
-        oscillator.type = 'sine';
-        
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.1);
-    } catch (e) {
-        console.log('Som não disponível');
+    for (var i = 0; i < 3; i++) {
+        setTimeout(function() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }, i * 200);
     }
 }
 
+// ===== VERIFICAR META =====
 function verificarMetaAtingida() {
     var casasAbertas = 0;
     casinhas.forEach(function(c) {
@@ -257,31 +227,14 @@ function verificarMetaAtingida() {
     var totalBancado = casasAbertas * VALOR_CASINHA;
     
     if (casasAbertas >= TOTAL_CASAS) {
-        mostrarCelebracao('🎊 META ATINGIDA! 🎊', 'Parabéns! Você economizou R$ ' + totalBancado.toFixed(2) + '!');
-        
-        for (var i = 0; i < 3; i++) {
-            setTimeout(function() {
-                confetti({
-                    particleCount: 200,
-                    spread: 80,
-                    origin: { y: 0.5 }
-                });
-            }, i * 300);
-        }
+        setTimeout(function() {
+            mostrarVitoria(totalBancado);
+            tocarSomVitoria();
+        }, 1000);
     }
 }
 
-function mostrarCelebracao(titulo, mensagem) {
-    var modal = document.getElementById('celebrationModal');
-    document.getElementById('celebrationText').textContent = titulo;
-    document.getElementById('celebrationMessage').textContent = mensagem;
-    modal.classList.add('show');
-}
-
-function fecharCelebracao() {
-    document.getElementById('celebrationModal').classList.remove('show');
-}
-
+// ===== ATUALIZAR PROGRESSO =====
 function atualizarProgresso() {
     var casasAbertas = 0;
     casinhas.forEach(function(c) {
@@ -295,6 +248,11 @@ function atualizarProgresso() {
     document.getElementById('total').textContent = totalBancado.toFixed(2);
     document.getElementById('casasAbertas').textContent = casasAbertas;
     document.getElementById('progressFill').style.width = percentual + '%';
+    
+    // Toast a cada 10%
+    if (percentual > 0 && percentual % 10 === 0 && casasAbertas % 10 === 0) {
+        mostrarToastProgresso(casasAbertas, TOTAL_CASAS, totalBancado);
+    }
 }
 
 // ===== FIREBASE =====
@@ -341,35 +299,6 @@ function carregarCasasDoFirebase() {
         });
 }
 
-    firebase.firestore().collection('usuarios').doc(usuarioLogado.uid).collection('progresso').doc('casas').get()
-        .then(function(doc) {
-            if (doc.exists) {
-                var dados = doc.data();
-                var casasPagas = dados.casasPagas || [];
-                
-                casinhas.forEach(function(casa) {
-                    if (casasPagas.indexOf(casa.numero) > -1) {
-                        casa.paga = true;
-                    }
-                });
-
-                var elementos = document.querySelectorAll('.casa');
-                elementos.forEach(function(el, index) {
-                    if (casinhas[index].paga) {
-                        el.classList.add('paga');
-                    } else {
-                        el.classList.remove('paga');
-                    }
-                });
-
-                atualizarProgresso();
-            }
-        })
-        .catch(function(error) {
-            console.error('Erro ao carregar:', error);
-        });
-}
-
 // ===== ADMIN =====
 function verificarAdminPassword() {
     var senha = document.getElementById('adminPassword').value;
@@ -406,8 +335,8 @@ function resetarTodosDados() {
     if (confirm('⚠️ Tem certeza? Isso apagará TODOS os dados!')) {
         casinhas.forEach(function(casa) { casa.paga = false; });
         
-        var elementos = document.querySelectorAll('.casa');
-        elementos.forEach(function(el) { el.classList.remove('paga'); });
+        var elementos = document.querySelectorAll('.casa-3d');
+        elementos.forEach(function(el) { el.classList.remove('flip'); });
         
         atualizarProgresso();
         salvarCasasNoFirebase();
