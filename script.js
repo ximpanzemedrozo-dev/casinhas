@@ -29,25 +29,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    document.getElementById('loginBtn').addEventListener('click', fazerLogin);
-    document.getElementById('registerBtn').addEventListener('click', fazerRegistro);
-    document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
+    var loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) loginBtn.addEventListener('click', fazerLogin);
+
+    var registerBtn = document.getElementById('registerBtn');
+    if (registerBtn) registerBtn.addEventListener('click', fazerRegistro);
+
+    var logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) logoutBtn.addEventListener('click', fazerLogout);
     
-    document.querySelectorAll('.character-card').forEach(function(card) {
+    var characterCards = document.querySelectorAll('.character-card');
+    characterCards.forEach(function(card) {
         card.addEventListener('click', selecionarCaractere);
     });
     
-    document.getElementById('adminBtn').addEventListener('click', function() {
-        document.getElementById('adminModal').classList.add('show');
-    });
+    var adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', function() {
+            document.getElementById('adminModal').classList.add('show');
+        });
+    }
     
-    document.getElementById('closeAdmin').addEventListener('click', function() {
-        document.getElementById('adminModal').classList.remove('show');
-    });
+    var closeAdmin = document.getElementById('closeAdmin');
+    if (closeAdmin) {
+        closeAdmin.addEventListener('click', function() {
+            document.getElementById('adminModal').classList.remove('show');
+        });
+    }
     
-    document.getElementById('verifyAdminBtn').addEventListener('click', verificarAdminPassword);
-    document.getElementById('updateTotalBtn').addEventListener('click', atualizarTotalCasas);
-    document.getElementById('resetAllBtn').addEventListener('click', resetarTodosDados);
+    var verifyAdminBtn = document.getElementById('verifyAdminBtn');
+    if (verifyAdminBtn) verifyAdminBtn.addEventListener('click', verificarAdminPassword);
+
+    var updateTotalBtn = document.getElementById('updateTotalBtn');
+    if (updateTotalBtn) updateTotalBtn.addEventListener('click', atualizarTotalCasas);
+
+    var resetAllBtn = document.getElementById('resetAllBtn');
+    if (resetAllBtn) resetAllBtn.addEventListener('click', resetarTodosDados);
 });
 
 // ===== AUTENTICAÇÃO =====
@@ -126,18 +143,5 @@ function carregarDadosUsuario() {
         })
         .catch(function(error) {
             console.error('Erro ao carregar dados:', error);
-            mostrarTela('characterScreen');
-        });
-}
-
-function selecionarCaractere(e) {
-    var characterId = e.currentTarget.getAttribute('data-char');
-    caracterSelecionado = parseInt(characterId);
-    
-    document.querySelectorAll('.character-card').forEach(function(card) {
-        card.classList.remove('selected');
-    });
-    e.currentTarget.classList.add('selected');
-    
-    salvarCaractereNoFirebase(caracterS
+            mostrarTela('character
 
