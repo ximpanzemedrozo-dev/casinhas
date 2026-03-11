@@ -119,11 +119,11 @@
             <div class="stats-bottom">
                 <div class="stat-item">
                     <span class="stat-icon">🏠</span>
-                    <span class="stat-text">Casinhas: <strong id="casasAbertasBottom">0</strong>/140</span>
+                    <span class="stat-text">Casinhas: <strong id="casasAbertasBottom">0</strong>/<span id="totalCasinhasBottom">140</span></span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-icon">🎯</span>
-                    <span class="stat-text">Meta: <strong>R$ 350,00</strong></span>
+                    <span class="stat-text">Meta: <strong id="metaBottomText">R$ 350,00</strong></span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-icon">⭐</span>
@@ -155,13 +155,20 @@
             
             <div id="adminPanel" class="admin-panel" style="display:none;">
                 <div class="admin-section">
-                    <h3>Gerenciar Casinhas</h3>
-                    <p>Total de casinhas: <strong id="totalCasasDisplay">140</strong></p>
+                    <h3>🎯 Meta e Casinhas</h3>
+                    <p>
+                        Valor por casinha: <strong>R$ 2,50</strong><br>
+                        Meta atual: <strong id="metaAtualDisplay">R$ 350,00</strong><br>
+                        Total de casinhas atual: <strong id="totalCasasDisplay">140</strong>
+                    </p>
                     
                     <div class="admin-controls">
-                        <label>Novo total:</label>
-                        <input type="number" id="newTotal" min="1" max="1000" value="140">
-                        <button id="updateTotalBtn" class="btn-success">Atualizar</button>
+                        <label>Nova meta (R$):</label>
+                        <input type="number" id="newMeta" min="1" max="100000" step="0.01" value="350">
+                        <small style="display:block;opacity:.85;margin-top:6px">
+                            O total de casinhas será calculado automaticamente: <strong>meta ÷ 2,50</strong>
+                        </small>
+                        <button id="updateMetaBtn" class="btn-success" style="margin-top:10px">Atualizar Meta</button>
                     </div>
                 </div>
                 
