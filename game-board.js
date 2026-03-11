@@ -1,9 +1,14 @@
-// ===== SISTEMA DE TRILHA 3D COM 400 HEXÁGONOS + TOUCH =====
+// ===== SISTEMA DE TRILHA 3D COM HEXÁGONOS + TOUCH (TOTAL DINÂMICO) =====
 
 let posicaoAtual = 0;
-let totalCasasJogo = 400;
+let totalCasasJogo = 400; // será sobrescrito pelo script.js via window.__TOTAL_CASAS_JOGO__
 
 function inicializarTrilha() {
+    // total dinâmico (meta ÷ 2,50)
+    if (typeof window.__TOTAL_CASAS_JOGO__ === 'number' && window.__TOTAL_CASAS_JOGO__ > 0) {
+        totalCasasJogo = window.__TOTAL_CASAS_JOGO__;
+    }
+
     const gameBoard = document.getElementById('gameBoard');
     if (!gameBoard) {
         console.error('Elemento gameBoard nao encontrado');
@@ -25,7 +30,7 @@ function inicializarTrilha() {
     const pathContainer = document.createElement('div');
     pathContainer.className = 'path-container';
 
-    // Personagem 3D BRANCO com CABELO PRETO
+    // Personagem 3D
     const playerContainer = document.createElement('div');
     playerContainer.id = 'playerMoving';
     playerContainer.className = 'player-container';
@@ -54,45 +59,42 @@ function inicializarTrilha() {
 }
 
 function gerarHexagons(container) {
-    const largura = container.offsetWidth || 1200;
     const altura = container.offsetHeight || 600;
-    
+
     // Grid OTIMIZADO: 50 casas por "página"
-    // 10 colunas x 5 linhas = 50 casas por tela
-    // Total 8 telas para 400 casas
-    
-    const tamanhoHex = 60;
     const espacoX = 70;
     const espacoY = 90;
-    
+
     const colunasPerTela = 10;
     const linhasPerTela = 5;
     const casasPerTela = colunasPerTela * linhasPerTela; // 50
-    
+
     let hex = 0;
-    let telasUsadas = 0;
-    
-    for (let tela = 0; tela < 8; tela++) {
+
+    // quantidade de telas necessária
+    const totalTelas = Math.ceil(totalCasasJogo / casasPerTela);
+
+    for (let tela = 0; tela < totalTelas; tela++) {
         let casasNestaTela = 0;
-        
+
         for (let row = 0; row < linhasPerTela; row++) {
             for (let col = 0; col < colunasPerTela; col++) {
                 if (hex >= totalCasasJogo) break;
                 if (casasNestaTela >= casasPerTela) break;
-                
+
                 // Posição X e Y dentro da tela
                 const posX = col * espacoX + (row % 2 ? espacoX / 2 : 0) + 20;
                 const posY = row * espacoY + 20 + (tela * altura);
-                
+
                 const casa = casinhas[hex];
                 if (!casa) break;
-                
+
                 const hexContainer = document.createElement('div');
                 hexContainer.className = 'hexagon-container';
                 hexContainer.style.left = posX + 'px';
                 hexContainer.style.top = posY + 'px';
                 hexContainer.setAttribute('data-index', hex);
-                
+
                 const hexBox = document.createElement('div');
                 hexBox.className = 'hexagon-box' + (casa.paga ? ' completada' : '');
                 hexBox.innerHTML = `
@@ -102,30 +104,24 @@ function gerarHexagons(container) {
                     </div>
                     <div class="hexagon-shadow"></div>
                 `;
-                
+
                 hexContainer.appendChild(hexBox);
-                
-                // ===== CRIAR CLOSURE PARA CAPTURAR VALORES =====
+
+                // eventos
                 (function(index, hexCont, hexB, c) {
-                    // ===== EVENTOS MOUSE =====
                     hexCont.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        if (!c.paga) {
-                            clicarCasaTrilha(index);
-                        }
+                        if (!c.paga) clicarCasaTrilha(index);
                     });
 
                     hexCont.addEventListener('mouseenter', function() {
-                        if (!c.paga) {
-                            hexB.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
-                        }
+                        if (!c.paga) hexB.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
                     });
 
                     hexCont.addEventListener('mouseleave', function() {
                         hexB.style.transform = '';
                     });
 
-                    // ===== EVENTOS TOUCH =====
                     hexCont.addEventListener('touchstart', function(e) {
                         e.stopPropagation();
                         hexB.style.transform = 'rotateY(15deg) rotateX(10deg) scale(1.15)';
@@ -133,9 +129,7 @@ function gerarHexagons(container) {
 
                     hexCont.addEventListener('touchend', function(e) {
                         e.stopPropagation();
-                        if (!c.paga) {
-                            clicarCasaTrilha(index);
-                        }
+                        if (!c.paga) clicarCasaTrilha(index);
                         hexB.style.transform = '';
                     }, { passive: true });
                 })(hex, hexContainer, hexBox, casa);
@@ -145,7 +139,7 @@ function gerarHexagons(container) {
                 casasNestaTela++;
             }
         }
-        
+
         if (hex >= totalCasasJogo) break;
     }
 }
@@ -153,38 +147,36 @@ function gerarHexagons(container) {
 function clicarCasaTrilha(index) {
     var casa = casinhas[index];
     if (!casa) return;
-    
+
     casa.paga = !casa.paga;
 
     var hexContainer = document.querySelector('[data-index="' + index + '"]');
     if (!hexContainer) return;
-    
+
     var hexBox = hexContainer.querySelector('.hexagon-box');
     if (!hexBox) return;
-    
+
     if (casa.paga) {
         hexBox.classList.add('completada');
         hexBox.classList.add('nova-casa');
         hexContainer.classList.add('clicada');
-        
-        // Fazer desaparecer com animação
+
         setTimeout(function() {
             if (hexContainer) {
                 hexContainer.style.opacity = '0';
                 hexContainer.style.transform = 'scale(0)';
                 hexContainer.style.pointerEvents = 'none';
-                
-                // MOSTRAR MENSAGEM DEPOIS QUE SUMIR
+
                 setTimeout(function() {
                     mostrarMensagem3D(casa);
                 }, 150);
             }
         }, 300);
-        
+
         verificarFogosDeArtificio();
         verificarMetaAtingida();
         tocarSomClick();
-        
+
         setTimeout(function() {
             hexBox.classList.remove('nova-casa');
             hexContainer.classList.remove('clicada');
@@ -210,16 +202,15 @@ function atualizarPosicaoPersonagem() {
     var playerMoving = document.getElementById('playerMoving');
     if (!playerMoving) return;
 
-    // Encontrar posição do último hexágono completado
     var ultimoHex = null;
     if (casasCompletas > 0) {
         ultimoHex = document.querySelector('[data-index="' + (casasCompletas - 1) + '"]');
     }
-    
+
     if (ultimoHex && casasCompletas > 0) {
         var posX = ultimoHex.offsetLeft + 30;
         var posY = ultimoHex.offsetTop + 30;
-        
+
         playerMoving.style.left = posX + 'px';
         playerMoving.style.top = posY + 'px';
     } else {
@@ -227,7 +218,6 @@ function atualizarPosicaoPersonagem() {
         playerMoving.style.top = '40px';
     }
 
-    // Atualizar linha de progresso
     var progressLine = document.getElementById('progressLine');
     if (progressLine) {
         var percentualProgress = (casasCompletas / totalCasasJogo) * 100;
@@ -246,7 +236,6 @@ function mostrarValorMetaFlutuante() {
     var totalBancado = casasCompletas * VALOR_CASINHA;
     var percentual = Math.round((casasCompletas / totalCasasJogo) * 100);
 
-    // Atualizar valor flutuante
     var valorDisplay = document.getElementById('valorDisplay');
     if (valorDisplay) {
         valorDisplay.innerHTML = `
@@ -256,7 +245,6 @@ function mostrarValorMetaFlutuante() {
         `;
     }
 
-    // Atualizar header
     var headerPercentage = document.getElementById('headerPercentage');
     if (headerPercentage) {
         headerPercentage.textContent = percentual + '%';
@@ -267,10 +255,15 @@ function mostrarValorMetaFlutuante() {
         headerProgressFill.style.width = percentual + '%';
     }
 
-    // Atualizar casinhas abertas
     var casasAbertasBottom = document.getElementById('casasAbertasBottom');
     if (casasAbertasBottom) {
         casasAbertasBottom.textContent = casasCompletas;
+    }
+
+    // total bottom
+    var totalCasinhasBottom = document.getElementById('totalCasinhasBottom');
+    if (totalCasinhasBottom) {
+        totalCasinhasBottom.textContent = totalCasasJogo;
     }
 }
 
