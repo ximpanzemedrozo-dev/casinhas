@@ -1,4 +1,4 @@
-/* ===== TABULEIRO (compatível com game-board.js atual: .hexagon-container/.hexagon-box) ===== */
+/* ===== TABULEIRO (compatível com game-board.js: .hexagon-container/.hexagon-box) ===== */
 
 .game-track{
   position:relative;
@@ -51,7 +51,6 @@
   justify-content:center;
   gap:6px;
 
-  /* forma hexagonal */
   clip-path: polygon(50% 0%, 92% 25%, 92% 75%, 50% 100%, 8% 75%, 8% 25%);
   border: 1px solid rgba(0,0,0,.08);
 }
@@ -67,7 +66,6 @@
   opacity:.9;
 }
 
-/* sombra extra (o JS cria .hexagon-shadow) */
 .hexagon-shadow{
   position:absolute;
   inset:0;
@@ -79,19 +77,16 @@
   clip-path: polygon(50% 0%, 92% 25%, 92% 75%, 50% 100%, 8% 75%, 8% 25%);
 }
 
-/* Hover */
 .hexagon-container:hover .hexagon-box{
   transform: translateY(-4px) scale(1.04);
   filter: drop-shadow(0 10px 18px rgba(0,0,0,.25));
 }
 
-/* completada (o JS adiciona .completada) */
 .hexagon-box.completada .hexagon-front{
   background: linear-gradient(135deg, #d6ffe9, #b8ffd9);
   box-shadow: 0 18px 35px rgba(22, 209, 138, .20), 0 18px 35px rgba(0,0,0,.30);
 }
 
-/* animação quando marca */
 .hexagon-box.nova-casa{
   animation: popDone .35s ease;
 }
@@ -100,11 +95,6 @@
   0%{ transform: scale(1); }
   60%{ transform: scale(1.10); }
   100%{ transform: scale(1); }
-}
-
-/* quando o JS coloca opacity 0 no container */
-.hexagon-container[style*="opacity: 0"]{
-  transition: opacity .25s ease, transform .25s ease;
 }
 
 /* ===== PLAYER + PROGRESS ===== */
@@ -151,7 +141,6 @@
   z-index:60;
 }
 
-/* Responsivo */
 @media (max-width: 480px){
   .hexagon-container{ width:74px; height:74px; }
   .hexagon-icone{ font-size:24px; }
