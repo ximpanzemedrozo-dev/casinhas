@@ -1,0 +1,251 @@
+/* Base + telas */
+:root{
+  --bg1:#0f3d27;
+  --bg2:#0b2c1d;
+  --panel:rgba(0,0,0,.22);
+  --panel2:rgba(0,0,0,.35);
+  --dotted:rgba(128,255,180,.35);
+  --text:#eafff3;
+  --muted:rgba(234,255,243,.75);
+  --yellow1:#ffcf00;
+  --yellow2:#ffb800;
+  --shadow: 0 18px 40px rgba(0,0,0,.35);
+  --radius:18px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  background: radial-gradient(900px 500px at 30% 15%, rgba(255,255,255,.07), transparent 60%),
+              linear-gradient(135deg, var(--bg1), var(--bg2));
+  overflow:hidden;
+}
+
+.screen{display:none; height:100%; width:100%;}
+.screen.active{display:block}
+
+/* Login */
+.login-container{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.login-container h1{margin:0 0 8px 0}
+.login-container p{margin:0 0 16px 0; color:var(--muted)}
+.login-form{
+  width:min(420px, 92vw);
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  padding:18px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+.login-form input{
+  width:100%;
+  padding:12px 12px;
+  margin:8px 0;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(0,0,0,.25);
+  color:var(--text);
+  outline:none;
+}
+.btn-primary,.btn-secondary,.btn-success,.btn-danger{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+}
+.btn-primary{background:linear-gradient(135deg, #16d18a, #0aa46a); color:#032214}
+.btn-secondary{background:rgba(255,255,255,.12); color:var(--text)}
+.btn-success{background:linear-gradient(135deg, #4caf50, #2f8f3a); color:#032214}
+.btn-danger{background:linear-gradient(135deg, #ff5b5b, #d82c2c); color:#fff}
+
+.error-msg{margin:10px 0 0; color:#ffb3b3; min-height:18px}
+
+/* Character select */
+.char-container{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  gap:10px;
+}
+.characters-grid{
+  width:min(760px, 95vw);
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap:14px;
+  margin-top:10px;
+}
+.character-card{
+  background:rgba(0,0,0,.22);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  padding:14px;
+  cursor:pointer;
+  text-align:center;
+  transition:.15s transform;
+}
+.character-card:hover{transform:translateY(-3px)}
+.char-icon{font-size:34px}
+
+/* Game header */
+.interland-header{
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  background:rgba(0,0,0,.22);
+  border-bottom:1px solid rgba(255,255,255,.10);
+  backdrop-filter: blur(8px);
+}
+.logo-section{display:flex; gap:10px; align-items:center}
+.logo-emoji{font-size:20px}
+.logo-text{font-weight:800}
+.header-middle{display:flex; flex-direction:column; gap:6px; align-items:center}
+.progress-mini{font-size:12px; color:var(--muted)}
+.progress-bar-mini{
+  width:min(320px, 42vw);
+  height:8px;
+  background:rgba(255,255,255,.10);
+  border-radius:999px;
+  overflow:hidden;
+}
+.progress-fill-mini{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg, #16d18a, #0aa46a);
+}
+.header-right{display:flex; align-items:center; gap:10px}
+.user-section{display:flex; align-items:center; gap:10px}
+.user-avatar{
+  width:34px; height:34px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.12);
+}
+.user-name{font-weight:700}
+.btn-admin-gear,.btn-logout{
+  width:38px; height:38px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.20);
+  color:var(--text);
+  cursor:pointer;
+}
+
+/* Main container / board area */
+.main-container{
+  height:calc(100% - 64px);
+  position:relative;
+  padding:18px;
+}
+
+.valor-display{
+  position:absolute;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(135deg, var(--yellow1), var(--yellow2));
+  color:#1b1400;
+  border-radius:18px;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow: 0 18px 45px rgba(255,200,0,.18), 0 14px 30px rgba(0,0,0,.35);
+  border:3px solid rgba(255,255,255,.55);
+  z-index:50;
+  min-width: 260px;
+  justify-content:center;
+}
+.valor-icon{font-size:20px}
+.valor-text{font-weight:900; font-size:26px; letter-spacing:.2px}
+.valor-porcentagem{
+  margin-left:6px;
+  background:rgba(255,255,255,.85);
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:14px;
+}
+
+/* Board wrapper */
+.game-wrapper{
+  height:100%;
+  padding-top:70px; /* espaço do pill amarelo */
+}
+.game-board-container{
+  height:calc(100% - 20px);
+  width:100%;
+  border:2px dashed var(--dotted);
+  border-radius: var(--radius);
+  padding:16px;
+  background: rgba(0,0,0,.12);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+  overflow:hidden;
+}
+
+/* Bottom stats (opcional) */
+.stats-bottom{
+  position:absolute;
+  left:18px;
+  bottom:12px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:13px;
+}
+.stat-item{
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  padding:10px 12px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.stat-icon{opacity:.9}
+
+/* Modal base */
+.modal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:9999;
+}
+.modal.show{display:flex}
+.modal-content{
+  width:min(560px, 95vw);
+  background:rgba(10,20,15,.85);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:18px;
+  padding:18px;
+  color:var(--text);
+  box-shadow: var(--shadow);
+}
+.modal-close{
+  float:right;
+  width:40px; height:40px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.2);
+  color:var(--text);
+  cursor:pointer;
+}
