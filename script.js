@@ -1,22 +1,26 @@
-// ===== SCRIPT PRINCIPAL (ADMIN + META DINÂMICA) =====
-// Compatível com o index.html atual (sem precisar alterar IDs)
+// ===== SCRIPT PRINCIPAL: LOGIN -> PERSONAGEM -> JOGO + ADMIN (VIVIANE) =====
 
 const VALOR_CASINHA = 2.5;
 
-// estado global (persistência simples)
+// defaults (persistem na sessão)
 window.__META_VALOR__ = (typeof window.__META_VALOR__ === 'number') ? window.__META_VALOR__ : 350;
-window.__TOTAL_CASAS_JOGO__ = (typeof window.__TOTAL_CASAS_JOGO__ === 'number') ? window.__TOTAL_CASAS_JOGO__ : 140;
+window.__TOTAL_CASAS_JOGO__ = (typeof window.__TOTAL_CASAS_JOGO__ === 'number') ? window.__TOTAL_CASAS_JOGO__ : Math.round(window.__META_VALOR__ / VALOR_CASINHA);
 
 let adminLiberado = false;
 
 function $(id) { return document.getElementById(id); }
 
+function showScreen(screenId) {
+  ['loginScreen', 'characterScreen', 'gameScreen'].forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.classList.toggle('active', id === screenId);
+  });
+}
+
 function formatBRL(v) {
-  try {
-    return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  } catch {
-    return 'R$ ' + (Number(v) || 0).toFixed(2);
-  }
+  try { return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+  catch { return 'R$ ' + (Number(v) || 0).toFixed(2); }
 }
 
 function clampNumber(n, min, max) {
@@ -26,14 +30,13 @@ function clampNumber(n, min, max) {
 }
 
 function calcularTotalCasinhas(metaEmReais) {
-  // cada casinha vale 2,50 => total = meta/2,50
   return Math.max(1, Math.round(metaEmReais / VALOR_CASINHA));
 }
 
 function garantirCasinhas() {
   if (!Array.isArray(window.casinhas)) window.casinhas = [];
-
   const total = window.__TOTAL_CASAS_JOGO__;
+
   if (window.casinhas.length < total) {
     for (let i = window.casinhas.length; i < total; i++) {
       window.casinhas.push({ numero: i + 1, paga: false });
@@ -59,11 +62,12 @@ function contarPagas() {
 function atualizarUIBasica() {
   const pagas = contarPagas();
   const total = window.__TOTAL_CASAS_JOGO__;
+  const meta = window.__META_VALOR__;
 
   const totalBancado = pagas * VALOR_CASINHA;
   const percentual = total > 0 ? Math.round((pagas / total) * 100) : 0;
 
-  // topo (valorDisplay é re-renderizado também pelo game-board.js, mas atualizamos aqui por segurança)
+  // pill topo
   const valorNumero = $('valorNumero');
   if (valorNumero) valorNumero.textContent = totalBancado.toFixed(2);
 
@@ -77,44 +81,46 @@ function atualizarUIBasica() {
   const headerProgressFill = $('headerProgressFill');
   if (headerProgressFill) headerProgressFill.style.width = percentual + '%';
 
-  // bottom casinhas (se existir)
-  const casasAbertasBottom = $('casasAbertasBottom');
-  if (casasAbertasBottom) casasAbertasBottom.textContent = pagas;
-
-  // atualiza texto "Casinhas: X/140" (no seu HTML original o /140 fica hardcoded)
+  // bottom: reescreve texto todo pra atualizar /TOTAL e meta
   const statCasinhas = document.querySelector('.stats-bottom .stat-item:nth-child(1) .stat-text');
   if (statCasinhas) {
     statCasinhas.innerHTML = `Casinhas: <strong id="casasAbertasBottom">${pagas}</strong>/${total}`;
   }
 
-  // atualiza texto da meta no rodapé
   const statMeta = document.querySelector('.stats-bottom .stat-item:nth-child(2) .stat-text');
   if (statMeta) {
-    statMeta.innerHTML = `Meta: <strong>${formatBRL(window.__META_VALOR__)}</strong>`;
+    statMeta.innerHTML = `Meta: <strong>${formatBRL(meta)}</strong>`;
   }
 
-  // status
   const bonusText = $('bonusText');
   if (bonusText) bonusText.textContent = percentual >= 100 ? 'Meta Atingida!' : 'Desbloqueado!';
 }
 
-// ===== ADMIN MODAL =====
-function abrirAdmin() {
-  const modal = $('adminModal');
-  if (modal) modal.classList.add('show');
+function iniciarJogo() {
+  garantirCasinhas();
+
+  // desenha a trilha
+  if (typeof window.inicializarTrilha === 'function') {
+    window.inicializarTrilha();
+  }
+
+  // atualiza UI
+  atualizarUIBasica();
+
+  // tenta também chamar funções existentes do projeto (se tiver)
+  if (typeof window.mostrarValorMetaFlutuante === 'function') {
+    window.mostrarValorMetaFlutuante();
+  }
 }
 
-function fecharAdmin() {
-  const modal = $('adminModal');
-  if (modal) modal.classList.remove('show');
-}
+// ===== ADMIN MODAL =====
+function abrirAdmin() { $('adminModal')?.classList.add('show'); }
+function fecharAdmin() { $('adminModal')?.classList.remove('show'); }
 
 function ensureAdminMetaUI() {
-  // injeta campo de META sem alterar index.html
   const panel = $('adminPanel');
   if (!panel) return;
-
-  if ($('newMeta')) return; // já existe
+  if ($('newMeta')) return;
 
   const section = panel.querySelector('.admin-section');
   if (!section) return;
@@ -131,15 +137,10 @@ function ensureAdminMetaUI() {
     <button id="updateMetaBtn" class="btn-success" style="margin-top:10px">Atualizar Meta</button>
   `;
 
-  // coloca acima do bloco "Novo total" existente
   const existingControls = section.querySelector('.admin-controls');
-  if (existingControls) {
-    section.insertBefore(metaWrap, existingControls);
-  } else {
-    section.appendChild(metaWrap);
-  }
+  if (existingControls) section.insertBefore(metaWrap, existingControls);
+  else section.appendChild(metaWrap);
 
-  // evento do botão
   $('updateMetaBtn')?.addEventListener('click', aplicarNovaMeta);
 }
 
@@ -161,56 +162,36 @@ function verificarAdmin() {
 
   ensureAdminMetaUI();
 
-  // preenche campos
-  const newMeta = $('newMeta');
-  if (newMeta) newMeta.value = String(window.__META_VALOR__);
+  // atualiza total display existente no HTML
+  const totalCasasDisplay = $('totalCasasDisplay');
+  if (totalCasasDisplay) totalCasasDisplay.textContent = String(window.__TOTAL_CASAS_JOGO__);
 
   const newTotal = $('newTotal');
   if (newTotal) newTotal.value = String(window.__TOTAL_CASAS_JOGO__);
 
-  // atualiza display do total no painel
-  const totalCasasDisplay = $('totalCasasDisplay');
-  if (totalCasasDisplay) totalCasasDisplay.textContent = String(window.__TOTAL_CASAS_JOGO__);
-}
-
-function redesenharTrilha() {
-  garantirCasinhas();
-
-  if (typeof window.inicializarTrilha === 'function') {
-    window.inicializarTrilha();
-  }
-
-  // pede também para o game-board recalcular UI se existir
-  if (typeof window.mostrarValorMetaFlutuante === 'function') {
-    window.mostrarValorMetaFlutuante();
-  }
-
-  atualizarUIBasica();
+  const newMeta = $('newMeta');
+  if (newMeta) newMeta.value = String(window.__META_VALOR__);
 }
 
 function aplicarNovaMeta() {
   if (!adminLiberado) return;
 
-  const error = $('adminError');
-  const metaInput = $('newMeta');
-
-  const meta = clampNumber(metaInput?.value, 1, 100000);
+  const meta = clampNumber($('newMeta')?.value, 1, 100000);
   window.__META_VALOR__ = meta;
+  window.__TOTAL_CASAS_JOGO__ = calcularTotalCasinhas(meta);
 
-  const novoTotal = calcularTotalCasinhas(meta);
-  window.__TOTAL_CASAS_JOGO__ = novoTotal;
-
-  // Atualiza também o input antigo "newTotal" (para ficar coerente na tela)
+  // sincroniza input antigo
   const newTotal = $('newTotal');
-  if (newTotal) newTotal.value = String(novoTotal);
+  if (newTotal) newTotal.value = String(window.__TOTAL_CASAS_JOGO__);
 
-  // atualiza display
   const totalCasasDisplay = $('totalCasasDisplay');
-  if (totalCasasDisplay) totalCasasDisplay.textContent = String(novoTotal);
+  if (totalCasasDisplay) totalCasasDisplay.textContent = String(window.__TOTAL_CASAS_JOGO__);
 
-  if (error) error.textContent = '';
-
-  redesenharTrilha();
+  garantirCasinhas();
+  if ($('gameScreen')?.classList.contains('active')) {
+    iniciarJogo();
+  }
+  atualizarUIBasica();
   fecharAdmin();
 }
 
@@ -221,18 +202,51 @@ function resetarTudo() {
   garantirCasinhas();
   window.casinhas.forEach(c => c.paga = false);
 
-  redesenharTrilha();
+  if ($('gameScreen')?.classList.contains('active')) {
+    iniciarJogo();
+  }
+  atualizarUIBasica();
   fecharAdmin();
 }
 
-function initEventos() {
-  // Admin
+// ===== Login / personagem =====
+function bindLoginFlow() {
+  $('loginBtn')?.addEventListener('click', () => {
+    // aqui você pode plugar Firebase depois. por enquanto vai direto
+    showScreen('characterScreen');
+  });
+
+  $('registerBtn')?.addEventListener('click', () => {
+    showScreen('characterScreen');
+  });
+
+  document.querySelectorAll('.character-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const char = card.querySelector('.char-icon')?.textContent || '🚗';
+      const name = card.querySelector('p')?.textContent || 'Usuario';
+
+      const characterDisplay = $('characterDisplay');
+      if (characterDisplay) characterDisplay.textContent = char;
+
+      const userName = $('userName');
+      if (userName) userName.textContent = name;
+
+      showScreen('gameScreen');
+      setTimeout(iniciarJogo, 50);
+    });
+  });
+
+  $('logoutBtn')?.addEventListener('click', () => {
+    showScreen('loginScreen');
+  });
+}
+
+function bindAdmin() {
   $('adminBtn')?.addEventListener('click', abrirAdmin);
   $('closeAdmin')?.addEventListener('click', fecharAdmin);
   $('verifyAdminBtn')?.addEventListener('click', verificarAdmin);
   $('resetAllBtn')?.addEventListener('click', resetarTudo);
 
-  // fecha clicando fora
   const adminModal = $('adminModal');
   if (adminModal) {
     adminModal.addEventListener('click', (e) => {
@@ -241,17 +255,15 @@ function initEventos() {
   }
 }
 
-function initApp() {
-  // Se o game já estiver aberto, tenta redesenhar com valores atuais
-  garantirCasinhas();
-  atualizarUIBasica();
+window.addEventListener('DOMContentLoaded', () => {
+  console.log('✅ script.js carregou e está ativo');
 
-  // expõe para outros scripts chamarem
-  window.redesenharTrilha = redesenharTrilha;
-  window.atualizarUIBasica = atualizarUIBasica;
-}
+  bindLoginFlow();
+  bindAdmin();
 
-window.addEventListener('DOMContentLoaded', function () {
-  initEventos();
-  initApp();
+  // se já estiver no gameScreen (caso de refresh)
+  setTimeout(() => {
+    if ($('gameScreen')?.classList.contains('active')) iniciarJogo();
+    atualizarUIBasica();
+  }, 200);
 });
