@@ -1,10 +1,11 @@
 // ===== SISTEMA DE TRILHA 3D COM HEXÁGONOS + TOUCH =====
+// Compatível com CSS .hexagon-container/.hexagon-box
+// Total de casas vem de window.__TOTAL_CASAS_JOGO__ (definido em script.js)
 
 let posicaoAtual = 0;
 let totalCasasJogo = 400;
 
 function inicializarTrilha() {
-    // total dinâmico vindo do script.js (meta ÷ 2,50)
     if (typeof window.__TOTAL_CASAS_JOGO__ === 'number' && window.__TOTAL_CASAS_JOGO__ > 0) {
         totalCasasJogo = window.__TOTAL_CASAS_JOGO__;
     }
@@ -48,10 +49,7 @@ function inicializarTrilha() {
 
     atualizarPosicaoPersonagem();
 
-    // atualiza UI do topo/rodapé se existir
-    if (typeof window.atualizarUIBasica === 'function') {
-        window.atualizarUIBasica();
-    }
+    if (typeof window.atualizarUI === 'function') window.atualizarUI();
 }
 
 function gerarHexagons(container) {
@@ -179,9 +177,9 @@ function clicarCasaTrilha(index) {
         hexContainer.style.pointerEvents = 'auto';
     }
 
-    if (typeof window.atualizarUIBasica === 'function') window.atualizarUIBasica();
     atualizarPosicaoPersonagem();
 
+    if (typeof window.atualizarUI === 'function') window.atualizarUI();
     if (typeof window.atualizarProgresso === 'function') window.atualizarProgresso();
     if (typeof window.salvarCasasNoFirebase === 'function') window.salvarCasasNoFirebase();
 }
