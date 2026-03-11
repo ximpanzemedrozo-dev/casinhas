@@ -1,10 +1,17 @@
 // ===== SCRIPT PRINCIPAL: LOGIN -> PERSONAGEM -> JOGO + ADMIN (VIVIANE) =====
+// Regras:
+// - cada casinha vale R$ 2,50
+// - total de casinhas = meta ÷ 2,50
+// - balão flutuante mostra ARRECADADO / META
+// - rodapé "Meta" sempre atualizado
 
 const VALOR_CASINHA = 2.5;
 
-// defaults (persistem na sessão)
+// defaults (sessão)
 window.__META_VALOR__ = (typeof window.__META_VALOR__ === 'number') ? window.__META_VALOR__ : 350;
-window.__TOTAL_CASAS_JOGO__ = (typeof window.__TOTAL_CASAS_JOGO__ === 'number') ? window.__TOTAL_CASAS_JOGO__ : Math.round(window.__META_VALOR__ / VALOR_CASINHA);
+window.__TOTAL_CASAS_JOGO__ = (typeof window.__TOTAL_CASAS_JOGO__ === 'number')
+  ? window.__TOTAL_CASAS_JOGO__
+  : Math.max(1, Math.round(window.__META_VALOR__ / VALOR_CASINHA));
 
 let adminLiberado = false;
 
@@ -59,17 +66,20 @@ function contarPagas() {
   return c;
 }
 
-function atualizarUIBasica() {
+function atualizarUI() {
   const pagas = contarPagas();
   const total = window.__TOTAL_CASAS_JOGO__;
   const meta = window.__META_VALOR__;
 
-  const totalBancado = pagas * VALOR_CASINHA;
+  const totalArrecadado = pagas * VALOR_CASINHA;
   const percentual = total > 0 ? Math.round((pagas / total) * 100) : 0;
 
-  // pill topo
+  // balão: arrecadado / meta
   const valorNumero = $('valorNumero');
-  if (valorNumero) valorNumero.textContent = totalBancado.toFixed(2);
+  if (valorNumero) valorNumero.textContent = totalArrecadado.toFixed(2);
+
+  const metaNumero = $('metaNumero');
+  if (metaNumero) metaNumero.textContent = formatBRL(meta);
 
   const valorPorcentagem = $('valorPorcentagem');
   if (valorPorcentagem) valorPorcentagem.textContent = percentual + '%';
@@ -81,68 +91,40 @@ function atualizarUIBasica() {
   const headerProgressFill = $('headerProgressFill');
   if (headerProgressFill) headerProgressFill.style.width = percentual + '%';
 
-  // bottom: reescreve texto todo pra atualizar /TOTAL e meta
-  const statCasinhas = document.querySelector('.stats-bottom .stat-item:nth-child(1) .stat-text');
-  if (statCasinhas) {
-    statCasinhas.innerHTML = `Casinhas: <strong id="casasAbertasBottom">${pagas}</strong>/${total}`;
-  }
+  // bottom
+  const casasAbertasBottom = $('casasAbertasBottom');
+  if (casasAbertasBottom) casasAbertasBottom.textContent = pagas;
 
-  const statMeta = document.querySelector('.stats-bottom .stat-item:nth-child(2) .stat-text');
-  if (statMeta) {
-    statMeta.innerHTML = `Meta: <strong>${formatBRL(meta)}</strong>`;
-  }
+  const totalCasinhasBottom = $('totalCasinhasBottom');
+  if (totalCasinhasBottom) totalCasinhasBottom.textContent = total;
+
+  const metaBottomText = $('metaBottomText');
+  if (metaBottomText) metaBottomText.textContent = formatBRL(meta);
 
   const bonusText = $('bonusText');
   if (bonusText) bonusText.textContent = percentual >= 100 ? 'Meta Atingida!' : 'Desbloqueado!';
+
+  // admin displays
+  const metaAtualDisplay = $('metaAtualDisplay');
+  if (metaAtualDisplay) metaAtualDisplay.textContent = formatBRL(meta);
+
+  const totalCasasDisplay = $('totalCasasDisplay');
+  if (totalCasasDisplay) totalCasasDisplay.textContent = String(total);
 }
 
 function iniciarJogo() {
   garantirCasinhas();
 
-  // desenha a trilha
   if (typeof window.inicializarTrilha === 'function') {
     window.inicializarTrilha();
   }
 
-  // atualiza UI
-  atualizarUIBasica();
-
-  // tenta também chamar funções existentes do projeto (se tiver)
-  if (typeof window.mostrarValorMetaFlutuante === 'function') {
-    window.mostrarValorMetaFlutuante();
-  }
+  atualizarUI();
 }
 
 // ===== ADMIN MODAL =====
 function abrirAdmin() { $('adminModal')?.classList.add('show'); }
 function fecharAdmin() { $('adminModal')?.classList.remove('show'); }
-
-function ensureAdminMetaUI() {
-  const panel = $('adminPanel');
-  if (!panel) return;
-  if ($('newMeta')) return;
-
-  const section = panel.querySelector('.admin-section');
-  if (!section) return;
-
-  const metaWrap = document.createElement('div');
-  metaWrap.className = 'admin-controls';
-  metaWrap.style.marginTop = '12px';
-  metaWrap.innerHTML = `
-    <label>Nova meta (R$):</label>
-    <input type="number" id="newMeta" min="1" max="100000" step="0.01" value="${window.__META_VALOR__}">
-    <small style="display:block;opacity:.85;margin-top:6px">
-      Total de casinhas = meta ÷ 2,50
-    </small>
-    <button id="updateMetaBtn" class="btn-success" style="margin-top:10px">Atualizar Meta</button>
-  `;
-
-  const existingControls = section.querySelector('.admin-controls');
-  if (existingControls) section.insertBefore(metaWrap, existingControls);
-  else section.appendChild(metaWrap);
-
-  $('updateMetaBtn')?.addEventListener('click', aplicarNovaMeta);
-}
 
 function verificarAdmin() {
   const pass = ($('adminPassword')?.value || '').trim();
@@ -160,17 +142,10 @@ function verificarAdmin() {
   if (error) error.textContent = '';
   if (panel) panel.style.display = 'block';
 
-  ensureAdminMetaUI();
-
-  // atualiza total display existente no HTML
-  const totalCasasDisplay = $('totalCasasDisplay');
-  if (totalCasasDisplay) totalCasasDisplay.textContent = String(window.__TOTAL_CASAS_JOGO__);
-
-  const newTotal = $('newTotal');
-  if (newTotal) newTotal.value = String(window.__TOTAL_CASAS_JOGO__);
-
   const newMeta = $('newMeta');
-  if (newMeta) newMeta.value = String(window.__META_VALOR__);
+  if (newMeta) newMeta.value = String(window.__META_VALOR__.toFixed(2));
+
+  atualizarUI();
 }
 
 function aplicarNovaMeta() {
@@ -180,18 +155,14 @@ function aplicarNovaMeta() {
   window.__META_VALOR__ = meta;
   window.__TOTAL_CASAS_JOGO__ = calcularTotalCasinhas(meta);
 
-  // sincroniza input antigo
-  const newTotal = $('newTotal');
-  if (newTotal) newTotal.value = String(window.__TOTAL_CASAS_JOGO__);
-
-  const totalCasasDisplay = $('totalCasasDisplay');
-  if (totalCasasDisplay) totalCasasDisplay.textContent = String(window.__TOTAL_CASAS_JOGO__);
-
   garantirCasinhas();
+
   if ($('gameScreen')?.classList.contains('active')) {
     iniciarJogo();
+  } else {
+    atualizarUI();
   }
-  atualizarUIBasica();
+
   fecharAdmin();
 }
 
@@ -202,23 +173,15 @@ function resetarTudo() {
   garantirCasinhas();
   window.casinhas.forEach(c => c.paga = false);
 
-  if ($('gameScreen')?.classList.contains('active')) {
-    iniciarJogo();
-  }
-  atualizarUIBasica();
+  if ($('gameScreen')?.classList.contains('active')) iniciarJogo();
+  atualizarUI();
   fecharAdmin();
 }
 
 // ===== Login / personagem =====
 function bindLoginFlow() {
-  $('loginBtn')?.addEventListener('click', () => {
-    // aqui você pode plugar Firebase depois. por enquanto vai direto
-    showScreen('characterScreen');
-  });
-
-  $('registerBtn')?.addEventListener('click', () => {
-    showScreen('characterScreen');
-  });
+  $('loginBtn')?.addEventListener('click', () => showScreen('characterScreen'));
+  $('registerBtn')?.addEventListener('click', () => showScreen('characterScreen'));
 
   document.querySelectorAll('.character-card').forEach(card => {
     card.addEventListener('click', () => {
@@ -236,15 +199,14 @@ function bindLoginFlow() {
     });
   });
 
-  $('logoutBtn')?.addEventListener('click', () => {
-    showScreen('loginScreen');
-  });
+  $('logoutBtn')?.addEventListener('click', () => showScreen('loginScreen'));
 }
 
 function bindAdmin() {
   $('adminBtn')?.addEventListener('click', abrirAdmin);
   $('closeAdmin')?.addEventListener('click', fecharAdmin);
   $('verifyAdminBtn')?.addEventListener('click', verificarAdmin);
+  $('updateMetaBtn')?.addEventListener('click', aplicarNovaMeta);
   $('resetAllBtn')?.addEventListener('click', resetarTudo);
 
   const adminModal = $('adminModal');
@@ -257,13 +219,14 @@ function bindAdmin() {
 
 window.addEventListener('DOMContentLoaded', () => {
   console.log('✅ script.js carregou e está ativo');
-
   bindLoginFlow();
   bindAdmin();
 
-  // se já estiver no gameScreen (caso de refresh)
   setTimeout(() => {
     if ($('gameScreen')?.classList.contains('active')) iniciarJogo();
-    atualizarUIBasica();
+    atualizarUI();
   }, 200);
+
+  // deixa global pra outros arquivos chamarem
+  window.atualizarUI = atualizarUI;
 });
