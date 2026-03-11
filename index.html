@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Jogo da Vida">
+    <title>Jogo da Vida - Tabuleiro das Casinhas 🏠</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="isometrico.css">
+    <link rel="stylesheet" href="game-effects.css">
+    <link rel="stylesheet" href="game-board.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <h1>🏠 Jogo da Vida</h1>
+            <p>Tabuleiro das Casinhas</p>
+            
+            <div class="login-form">
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Senha" required>
+                
+                <button id="loginBtn" class="btn-primary">🔑 Entrar</button>
+                <button id="registerBtn" class="btn-secondary">📝 Criar Conta</button>
+            </div>
+            
+            <p id="loginError" class="error-msg"></p>
+        </div>
+    </div>
+
+    <!-- CHARACTER SELECT SCREEN -->
+    <div id="characterScreen" class="screen">
+        <div class="char-container">
+            <h1>🎮 Escolha seu Dedal</h1>
+            <p>Qual será seu personagem?</p>
+            
+            <div class="characters-grid">
+                <div class="character-card" data-char="1">
+                    <div class="char-icon">🚗</div>
+                    <p>Carro Vermelho</p>
+                </div>
+                <div class="character-card" data-char="2">
+                    <div class="char-icon">💎</div>
+                    <p>Chapéu de Seda</p>
+                </div>
+                <div class="character-card" data-char="3">
+                    <div class="char-icon">⌚</div>
+                    <p>Relógio de Ouro</p>
+                </div>
+                <div class="character-card" data-char="4">
+                    <div class="char-icon">🐶</div>
+                    <p>Cachorro</p>
+                </div>
+                <div class="character-card" data-char="5">
+                    <div class="char-icon">🎩</div>
+                    <p>Cartola</p>
+                </div>
+                <div class="character-card" data-char="6">
+                    <div class="char-icon">👑</div>
+                    <p>Coroa</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GAME SCREEN -->
+    <div id="gameScreen" class="screen">
+        <!-- HEADER -->
+        <header class="interland-header">
+            <div class="header-left">
+                <div class="logo-section">
+                    <span class="logo-emoji">🏠</span>
+                    <span class="logo-text">Jogo da Vida</span>
+                </div>
+            </div>
+
+            <div class="header-middle">
+                <div class="progress-mini">
+                    <span class="progress-label">Progresso:</span>
+                    <span class="progress-value" id="headerPercentage">0%</span>
+                </div>
+                <div class="progress-bar-mini">
+                    <div class="progress-fill-mini" id="headerProgressFill"></div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="user-section">
+                    <div class="user-avatar" id="characterDisplay">🚗</div>
+                    <div class="user-name" id="userName">Usuario</div>
+                </div>
+                <button id="adminBtn" class="btn-admin-gear" title="Configuracoes">⚙️</button>
+                <button id="logoutBtn" class="btn-logout">🚪</button>
+            </div>
+        </header>
+
+        <!-- CONTAINER PRINCIPAL -->
+        <div class="main-container">
+            <!-- VALOR FLUTUANTE -->
+            <div class="valor-display" id="valorDisplay">
+                <span class="valor-icon">💰</span>
+                <span class="valor-text">R$ <strong id="valorNumero">0.00</strong></span>
+                <span class="valor-porcentagem" id="valorPorcentagem">0%</span>
+            </div>
+
+            <!-- TRILHA DO JOGO -->
+            <div class="game-wrapper">
+                <div class="game-board-container">
+                    <div id="gameBoard"></div>
+                </div>
+            </div>
+
+            <!-- STATS BOTTOM -->
+            <div class="stats-bottom">
+                <div class="stat-item">
+                    <span class="stat-icon">🏠</span>
+                    <span class="stat-text">Casinhas: <strong id="casasAbertasBottom">0</strong>/140</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">🎯</span>
+                    <span class="stat-text">Meta: <strong>R$ 350,00</strong></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">⭐</span>
+                    <span class="stat-text">Status: <strong id="bonusText">Desbloqueado!</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VARIÁVEIS OCULTAS -->
+    <div style="display: none;">
+        <span id="percentage">0</span>
+        <span id="total">0</span>
+        <span id="casasAbertas">0</span>
+        <span id="progressFill"></span>
+    </div>
+
+    <!-- ADMIN MODAL -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content admin-content">
+            <button class="modal-close" id="closeAdmin">&times;</button>
+            <h2>⚙️ Painel Administrativo</h2>
+            
+            <div class="admin-form">
+                <label>Senha de Administrador:</label>
+                <input type="password" id="adminPassword" placeholder="Digite a senha">
+                <button id="verifyAdminBtn" class="btn-primary">Verificar</button>
+            </div>
+            
+            <div id="adminPanel" class="admin-panel" style="display:none;">
+                <div class="admin-section">
+                    <h3>Gerenciar Casinhas</h3>
+                    <p>Total de casinhas: <strong id="totalCasasDisplay">140</strong></p>
+                    
+                    <div class="admin-controls">
+                        <label>Novo total:</label>
+                        <input type="number" id="newTotal" min="1" max="1000" value="140">
+                        <button id="updateTotalBtn" class="btn-success">Atualizar</button>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Acoes</h3>
+                    <button id="resetAllBtn" class="btn-danger">🔄 Resetar Todos os Dados</button>
+                </div>
+            </div>
+            
+            <p id="adminError" class="error-msg"></p>
+        </div>
+    </div>
+
+    <!-- CELEBRAÇÃO MODAL -->
+    <div id="celebrationModal" class="modal celebration-modal">
+        <div class="celebration-content">
+            <div class="celebration-icon">🎉</div>
+            <h2 id="celebrationText">META ATINGIDA!</h2>
+            <p id="celebrationMessage">Parabens! Voce economizou R$ 350,00!</p>
+            <button class="btn-primary" onclick="fecharCelebracao()">Continuar</button>
+        </div>
+    </div>
+
+    <!-- FIREBASE SCRIPTS -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+
+    <!-- APP SCRIPTS -->
+    <script src="firebase-config.js"></script>
+    <script src="dados-casinhas.js"></script>
+    <script src="game-audio.js"></script>
+    <script src="game-animations.js"></script>
+    <script src="isometrico-3d.js"></script>
+    <script src="game-board.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
