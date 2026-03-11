@@ -1,0 +1,29 @@
+/* Fundo com textura leve tipo "grade" (igual da imagem) */
+.game-board-container{
+  position:relative;
+}
+
+#gameBoard{
+  width:100%;
+  height:100%;
+  position:relative;
+  border-radius:14px;
+  overflow:auto;
+  background:
+    radial-gradient(900px 500px at 30% 15%, rgba(255,255,255,.06), transparent 60%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,.06) 0px,
+      rgba(255,255,255,.06) 2px,
+      transparent 2px,
+      transparent 22px
+    );
+}
+
+/* scroll bonito */
+#gameBoard::-webkit-scrollbar{width:10px; height:10px}
+#gameBoard::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.14);
+  border-radius:999px;
+}
+#gameBoard::-webkit-scrollbar-track{background:rgba(0,0,0,.12)}
